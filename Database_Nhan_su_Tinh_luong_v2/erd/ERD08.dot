@@ -1,0 +1,8 @@
+digraph ERD {
+graph [rankdir=TB, nodesep=0.6, ranksep=0.7, splines=polyline, bgcolor="white", pad=0.3];
+node [shape=plain, fontname="DejaVu Sans"];
+edge [color="#7891a6",fontname="DejaVu Sans",fontsize=9,arrowsize=0.7];
+"AUDIT_LOG" [label=<<TABLE BORDER="1" COLOR="#cbd5df" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7"><TR><TD COLSPAN="2" BGCOLOR="#102c43"><FONT COLOR="white" POINT-SIZE="15"><B>AUDIT_LOG</B></FONT></TD></TR><TR><TD PORT="audit_id" ALIGN="LEFT"><FONT POINT-SIZE="13">audit_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK </FONT></TD></TR><TR><TD PORT="actor_id" ALIGN="LEFT"><FONT POINT-SIZE="13">actor_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">FK ?</FONT></TD></TR></TABLE>>];
+"APP_NOTIFICATION" [label=<<TABLE BORDER="1" COLOR="#cbd5df" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7"><TR><TD COLSPAN="2" BGCOLOR="#102c43"><FONT COLOR="white" POINT-SIZE="15"><B>APP_NOTIFICATION</B></FONT></TD></TR><TR><TD PORT="notification_id" ALIGN="LEFT"><FONT POINT-SIZE="13">notification_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK </FONT></TD></TR><TR><TD PORT="user_id" ALIGN="LEFT"><FONT POINT-SIZE="13">user_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">FK </FONT></TD></TR></TABLE>>];
+"SYSTEM_MUTEX" [label=<<TABLE BORDER="1" COLOR="#cbd5df" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7"><TR><TD COLSPAN="2" BGCOLOR="#102c43"><FONT COLOR="white" POINT-SIZE="15"><B>SYSTEM_MUTEX</B></FONT></TD></TR><TR><TD PORT="lock_key" ALIGN="LEFT"><FONT POINT-SIZE="13">lock_key</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK </FONT></TD></TR></TABLE>>];
+}

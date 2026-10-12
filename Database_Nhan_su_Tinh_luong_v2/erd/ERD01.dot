@@ -1,0 +1,11 @@
+digraph ERD {
+graph [rankdir=TB, nodesep=0.6, ranksep=0.7, splines=polyline, bgcolor="white", pad=0.3];
+node [shape=plain, fontname="DejaVu Sans"];
+edge [color="#7891a6",fontname="DejaVu Sans",fontsize=9,arrowsize=0.7];
+"APP_USER" [label=<<TABLE BORDER="1" COLOR="#cbd5df" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7"><TR><TD COLSPAN="2" BGCOLOR="#102c43"><FONT COLOR="white" POINT-SIZE="15"><B>APP_USER</B></FONT></TD></TR><TR><TD PORT="user_id" ALIGN="LEFT"><FONT POINT-SIZE="13">user_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK </FONT></TD></TR><TR><TD PORT="employee_id" ALIGN="LEFT"><FONT POINT-SIZE="13">employee_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">FK ?</FONT></TD></TR></TABLE>>];
+"APP_ROLE" [label=<<TABLE BORDER="1" COLOR="#cbd5df" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7"><TR><TD COLSPAN="2" BGCOLOR="#102c43"><FONT COLOR="white" POINT-SIZE="15"><B>APP_ROLE</B></FONT></TD></TR><TR><TD PORT="role_id" ALIGN="LEFT"><FONT POINT-SIZE="13">role_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK </FONT></TD></TR></TABLE>>];
+"USER_ROLE" [label=<<TABLE BORDER="1" COLOR="#cbd5df" CELLBORDER="0" CELLSPACING="0" CELLPADDING="7"><TR><TD COLSPAN="2" BGCOLOR="#102c43"><FONT COLOR="white" POINT-SIZE="15"><B>USER_ROLE</B></FONT></TD></TR><TR><TD PORT="user_id" ALIGN="LEFT"><FONT POINT-SIZE="13">user_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK FK </FONT></TD></TR><TR><TD PORT="role_id" ALIGN="LEFT"><FONT POINT-SIZE="13">role_id</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">PK FK </FONT></TD></TR><TR><TD PORT="granted_by" ALIGN="LEFT"><FONT POINT-SIZE="13">granted_by</FONT></TD><TD ALIGN="LEFT"><FONT COLOR="#61768c" POINT-SIZE="11">FK ?</FONT></TD></TR></TABLE>>];
+"APP_USER" -> "USER_ROLE" [taillabel="1",headlabel="0..*",label=""];
+"APP_ROLE" -> "USER_ROLE" [taillabel="1",headlabel="0..*",label=""];
+"APP_USER" -> "USER_ROLE" [taillabel="0..1",headlabel="0..*",label=""];
+}

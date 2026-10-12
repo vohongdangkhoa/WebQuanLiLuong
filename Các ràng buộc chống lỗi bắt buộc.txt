@@ -1,0 +1,19 @@
+UNIQUE (employee_id, work_date)
+UNIQUE (employee_id, payroll_period_id, version_no)
+UNIQUE (period_month, period_year)
+CHECK (gross_salary >= 0)
+CHECK (insurance_amount >= 0)
+CHECK (pit_amount >= 0)
+CHECK (net_salary >= 0)
+
+Ngoài ra:
+
+Không cho hai hợp đồng chồng thời gian.
+Không cho OT trùng khoảng thời gian.
+Không tính OT chưa duyệt.
+Không cho người tính đồng thời là người duyệt.
+Không sửa bảng lương đã APPROVED.
+Không xóa nhân viên đã có bảng lương.
+Không cho cùng một tài khoản ngân hàng nhận lương của nhiều nhân viên nếu chưa xác minh.
+Chống nhấn nút [Tính lương] hai lần.
+Dùng SELECT ... FOR UPDATE hoặc khóa logic khi một kỳ đang được tính.

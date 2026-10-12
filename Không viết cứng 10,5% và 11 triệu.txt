@@ -1,0 +1,35 @@
+Hai giá trị này chỉ nên là ví dụ. Không được viết:
+
+v_insurance := v_salary * 10.5 / 100;
+v_personal_deduction := 11000000;
+
+Nên có bảng:
+
+PAYROLL_POLICY
+- PolicyID
+- PolicyType
+- Rate
+- FixedAmount
+- EffectiveFrom
+- EffectiveTo
+- MaxBase
+- Status
+
+Ví dụ các loại chính sách:
+
+SOCIAL_INSURANCE_RATE
+HEALTH_INSURANCE_RATE
+UNEMPLOYMENT_INSURANCE_RATE
+PERSONAL_DEDUCTION
+DEPENDENT_DEDUCTION
+OVERTIME_WEEKDAY_RATE
+OVERTIME_WEEKEND_RATE
+OVERTIME_HOLIDAY_RATE
+
+Lợi ích:
+
+Chính sách thay đổi không cần sửa code.
+Bảng lương cũ không bị tính theo chính sách mới.
+Có thể giải thích tốt khi cô hỏi về bảo trì package.
+
+Nhóm phải trích dẫn nguồn chính thức tại thời điểm làm đồ án nếu sử dụng mức thuế và bảo hiểm thực tế.

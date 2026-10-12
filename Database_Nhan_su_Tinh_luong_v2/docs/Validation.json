@@ -1,0 +1,13 @@
+{
+  "table_count": 48,
+  "foreign_key_count": 105,
+  "column_count": 404,
+  "trigger_count": 33,
+  "parsed_statement_counts": {
+    "02_tables.sql": 605,
+    "03_indexes.sql": 98
+  },
+  "static_assertions_passed": 839,
+  "oracle_executed": false,
+  "oracle_compiled": false
+}

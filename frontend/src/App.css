@@ -1,0 +1,67 @@
+.app-header {
+  background-color: #080a7c;
+  color: white;
+  padding: 20px;
+}
+/* tạo hộp trắng chứa nội dung trang */
+.app-content {
+  margin: 24px;
+  padding: 24px;
+  background-color: white;
+  border-radius: 8px;
+  flex: 1;
+  min-width: 0;
+}
+/* display: flex: cho menu và vùng nội dung đứng cạnh nhau.
+width: 200px: đặt chiều rộng menu.
+flex-shrink: 0: giữ menu không bị ép nhỏ hơn chiều rộng đã đặt.
+.app-sidebar a: chọn các liên kết nằm trong menu.
+display: block: cho mỗi liên kết đứng trên một dòng riêng.
+margin-bottom: 12px: tạo khoảng cách giữa các mục menu.*/
+.app-body {
+  display: flex;
+}
+
+.app-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  padding: 24px;
+}
+
+.app-sidebar a {
+  display: block;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  color: #1f2937;
+  text-decoration: none;
+}
+
+.app-sidebar a.active {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+  font-weight: bold;
+}
+
+.employees-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.employees-table caption {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.employees-table th,
+.employees-table td {
+  border: 1px solid #d1d5db;
+  padding: 12px;
+  text-align: left;
+}
+
+.employees-table th {
+  background-color: #eff6ff;
+}

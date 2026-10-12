@@ -1,0 +1,18 @@
+Trigger 1: khóa dữ liệu đã duyệt
+Nếu kỳ lương đã APPROVED, PAID hoặc CLOSED
+→ chặn UPDATE/DELETE bảng lương và dữ liệu đầu vào.
+Trigger 2: ghi nhật ký thay đổi
+
+Ghi:
+
+Người thao tác.
+Thời điểm.
+Bảng và bản ghi bị tác động.
+Giá trị trước.
+Giá trị sau.
+Lý do.
+Trigger 3: kiểm tra hợp đồng chồng thời gian
+
+Nên dùng compound trigger hoặc procedure kiểm tra tập dữ liệu. Không dùng row trigger rồi truy vấn lại chính bảng hợp đồng vì có nguy cơ lỗi mutating table.
+
+Lưu ý: không nên nhét toàn bộ công thức tính lương vào trigger. Package mới là nơi phù hợp để tính lương; trigger dùng để bảo vệ dữ liệu và audit.

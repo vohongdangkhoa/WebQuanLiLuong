@@ -1,0 +1,18 @@
+PAYROLL_RESULT phải lưu snapshot:
+
+Mức lương cơ bản được sử dụng.
+Mức lương đóng bảo hiểm.
+Số người phụ thuộc được chấp nhận.
+Số ngày công chuẩn.
+Số ngày công hưởng lương.
+Số giờ OT theo từng loại.
+Tổng phụ cấp.
+Tổng thưởng.
+Tổng bảo hiểm.
+Thu nhập tính thuế.
+Thuế TNCN.
+Lương Net.
+Mã chính sách.
+Phiên bản tính lương.
+
+Nếu tháng sau HR sửa lương cơ bản, kết quả tháng trước không được thay đổi.
