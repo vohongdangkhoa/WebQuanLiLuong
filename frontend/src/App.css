@@ -1,7 +1,18 @@
+/* display: flex: xếp tiêu đề và nhóm tài khoản cạnh nhau.
+align-items: center: căn chúng thẳng hàng theo chiều dọc.
+justify-content: space-between: đẩy tiêu đề sang trái, nhóm tài khoản sang phải.
+flex-wrap: wrap: cho phép xuống dòng khi màn hình hẹp.
+gap: 16px: tạo khoảng cách giữa các phần. */
+
 .app-header {
   background-color: #080a7c;
   color: white;
   padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 /* tạo hộp trắng chứa nội dung trang */
 .app-content {
@@ -65,3 +76,163 @@ margin-bottom: 12px: tạo khoảng cách giữa các mục menu.*/
 .employees-table th {
   background-color: #eff6ff;
 }
+
+/* 
+min-height: 100vh: vùng đăng nhập cao ít nhất bằng màn hình trình duyệt.
+display: grid và place-items: center: đặt khung đăng nhập vào giữa theo cả chiều ngang và chiều dọc.
+max-width: 420px: giới hạn chiều rộng khung; width: 100% giúp khung thu nhỏ theo màn hình.
+padding: 32px: tạo khoảng trống giữa nội dung và viền khung.
+border-radius và box-shadow: bo góc và tạo bóng. */
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* .login-field: tạo khoảng cách giữa hai nhóm nhập liệu.
+label có display: block: nhãn nằm trên một dòng riêng, phía trên ô nhập.
+input có width: 100%: ô nhập rộng bằng vùng nội dung bên trong khung.
+font: inherit: ô nhập dùng cùng kiểu chữ với trang.
+:focus: áp dụng khi bạn bấm vào ô nhập hoặc dùng phím Tab để chọn ô đó. */
+
+.login-field {
+  margin-bottom: 20px;
+}
+
+.login-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.login-field input:focus {
+  outline: 2px solid #080a7c;
+  outline-offset: 2px;
+}
+
+/* .login-submit: chỉnh nút đăng nhập thành màu xanh, chữ trắng và rộng bằng ô nhập.
+cursor: pointer: khi đưa chuột vào nút, con trỏ hiện hình bàn tay.
+:disabled: áp dụng khi nút đang bị khóa trong lúc gửi yêu cầu đăng nhập.
+opacity: 0.6: làm nút mờ đi để thể hiện trạng thái đang chờ.
+.login-error: cho thông báo lỗi có màu đỏ. */
+
+.login-submit {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 6px;
+  background-color: #080a7c;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.login-error {
+  color: #b91c1c;
+  line-height: 1.5;
+}
+/* 
+.header-account đặt tên tài khoản và nút Đăng xuất cạnh nhau. Đoạn .app-header > p giúp thông báo lỗi đăng xuất, nếu có, nằm trên một dòng riêng. */
+
+.header-account {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.app-header > p {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* .header-account button: chọn nút nằm trong nhóm tài khoản.
+transparent: nền trong suốt, nhìn thấy màu xanh phía sau.
+:hover: khi đưa chuột lên nút, nền sáng lên nhẹ.
+:focus-visible: giúp nhận ra nút đang được chọn khi dùng bàn phím, chẳng hạn phím Tab.
+:disabled: làm nút mờ đi trong lúc chờ đăng xuất. */
+
+.header-account button {
+  padding: 8px 12px;
+  border: 1px solid white;
+  border-radius: 6px;
+  background-color: transparent;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+.header-account button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.header-account button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+.header-account button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.employees-search,
+.employees-status-filter {
+  margin-top: 20px;
+}
+
+.employees-search label,
+.employees-status-filter label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.employees-search input,
+.employees-status-filter select {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: white;
+  color: inherit;
+  font: inherit;
+}
+
+.employees-search input:focus,
+.employees-status-filter select:focus {
+  outline: 2px solid #080a7c;
+  outline-offset: 2px;
+}
+
+/* display: block: đặt nhãn trên một dòng riêng.
+width: 100% kết hợp max-width: 420px: ô nhập rộng tối đa 420px và thu nhỏ theo vùng nội dung.
+padding: tạo khoảng trống quanh chữ trong ô.
+:focus: hiện viền xanh khi bạn chọn ô nhập. */

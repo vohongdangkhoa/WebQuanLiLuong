@@ -140,3 +140,33 @@ export async function logoutUser() {
 
   return data;
 }
+export async function getEmployees() {
+  const response = await fetch(`${API_BASE_URL}/employees`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    throw new Error(
+      "Phiên đăng nhập không còn hợp lệ. Hãy tải lại trang để đăng nhập lại.",
+    );
+  }
+
+  if (response.status === 403) {
+    throw new Error("Bạn không có quyền xem danh sách nhân viên.");
+  }
+
+  if (!response.ok) {
+    throw new Error("Không tải được danh sách nhân viên. Vui lòng thử lại.");
+  }
+
+  const data = await response.json();
+  return data;
+}
+/* fetch(...): gọi API /api/employees.
+credentials: "include": gửi kèm cookie đăng nhập khi React gọi backend ở cổng khác.
+cache: "no-store": lấy dữ liệu mới từ backend.
+401: phiên đăng nhập không hợp lệ.
+403: tài khoản không có quyền xem nhân viên.
+response.json(): đọc kết quả JSON thành danh sách để React sử dụng.
+export: cho phép trang Nhân viên nhập và gọi hàm này. */

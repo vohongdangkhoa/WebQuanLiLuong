@@ -1,0 +1,112 @@
+Giai đoạn 1: Thu thập dữ liệu
+Máy chấm công gửi dữ liệu gốc vào TIMEKEEPING_RAW.
+Nhân viên tạo đơn nghỉ phép và tăng ca.
+Người có thẩm quyền duyệt đơn.
+Hệ thống lập bảng công xử lý từ dữ liệu gốc.
+
+Không nhập thẳng dữ liệu máy chấm công vào TB_TIMESHEET rồi ghi đè. Nên có:
+
+TIMEKEEPING_RAW: dữ liệu nguyên bản, không sửa.
+TIMESHEET_DAILY: dữ liệu đã xử lý theo từng ngày.
+TIMESHEET_MONTHLY: tổng hợp kỳ lương.
+Giai đoạn 2: Chốt dữ liệu đầu vào
+
+Trước khi chốt, hệ thống phải kiểm tra:
+
+Ngày thiếu chấm công.
+Giờ ra nhỏ hơn giờ vào.
+Ca đêm qua ngày.
+Nghỉ phép chưa duyệt.
+Tăng ca chưa duyệt.
+Nhân viên chưa có hợp đồng hiệu lực.
+Nhân viên có hai hợp đồng chồng nhau.
+Người phụ thuộc chưa xác minh.
+
+Nếu còn lỗi nghiêm trọng, không cho HR chốt.
+
+Giai đoạn 3: Tính lương nháp
+
+Kế toán tạo một PAYROLL_RUN, ví dụ:
+
+RUN_ID: PR-2026-09-V1
+Kỳ lương: 09/2026
+Phiên bản: 1
+Trạng thái: CALCULATING
+Người thực hiện: ACCOUNTANT01
+
+Hệ thống tính từng nhân viên và lưu:
+
+Thành công.
+Thất bại.
+Cảnh báo.
+Chi tiết công thức.
+Thời gian xử lý.
+
+Một nhân viên bị lỗi không nên làm mất kết quả của toàn bộ 500 nhân viên. PAYROLL_RUN phải cho biết:
+
+Tổng nhân viên: 500
+Thành công: 498
+Thất bại: 2
+
+Hai nhân viên lỗi phải được sửa trước khi gửi duyệt.
+
+Giai đoạn 4: Kiểm tra và tính lại
+
+Kế toán không sửa bảng công.
+
+Quy trình đúng:
+
+Kế toán phát hiện bất thường.
+Tạo yêu cầu điều chỉnh.
+HR nhập lý do mở khóa.
+HR sửa dữ liệu.
+HR chốt lại.
+Kế toán tạo phiên bản tính lương mới V2.
+V1 vẫn được giữ để audit, không xóa mất dấu vết.
+Giai đoạn 5: Phê duyệt
+
+Giám đốc có thể:
+
+APPROVE: phê duyệt.
+REJECT: từ chối kèm lý do.
+
+Khi duyệt, hệ thống phải lưu:
+
+Người duyệt.
+Thời điểm duyệt.
+Phiên bản được duyệt.
+Tổng Gross.
+Tổng bảo hiểm.
+Tổng thuế.
+Tổng Net.
+Lý do nếu từ chối.
+
+Chỉ khóa đúng phiên bản được duyệt, không khóa mơ hồ theo “tháng”.
+
+Giai đoạn 6: Thanh toán và đối soát
+
+Xuất file ngân hàng chưa có nghĩa là đã trả lương.
+
+Cần các trạng thái:
+
+CREATED
+EXPORTED
+SENT_TO_BANK
+PROCESSING
+SUCCESS
+FAILED
+
+Một file có thể có 100 nhân viên nhưng 3 giao dịch thất bại do:
+
+Sai số tài khoản.
+Tài khoản bị khóa.
+Sai tên ngân hàng.
+Giao dịch bị ngân hàng từ chối.
+
+Vì vậy phải có:
+
+PAYMENT_BATCH: đợt thanh toán.
+PAYMENT_ITEM: kết quả từng nhân viên.
+Chức năng chuyển lại riêng các giao dịch thất bại.
+
+Chỉ chuyển bảng lương sang PAID khi đã nhận kết quả thành công từ ngân hàng hoặc kế toán đối soát có bằng chứng.
