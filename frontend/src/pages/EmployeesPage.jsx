@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getEmployees } from "../services/api";
+import { createEmployee, getEmployees } from "../services/api";
+import EmployeeAssignmentForm from "../components/EmployeeAssignmentForm";
 const employeeStatusLabels = {
   ACTIVE: "Đang làm việc",
   INACTIVE: "Không hoạt động",
@@ -11,6 +12,12 @@ function EmployeesPage() {
   const [loadError, setLoadError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [employeeCode, setEmployeeCode] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [hireDate, setHireDate] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitMessage, setSubmitMessage] = useState("");
   const keyword = searchTerm.trim().toLowerCase();
 
   const filteredEmployees = employees.filter((employee) => {
@@ -51,6 +58,49 @@ function EmployeesPage() {
       ignore = true;
     };
   }, []);
+  async function handleCreateEmployee(event) {
+    event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+    setSubmitMessage("");
+
+    try {
+      await createEmployee({
+        employeeCode: employeeCode.trim(),
+        fullName: fullName.trim(),
+        hireDate,
+      });
+
+      setEmployeeCode("");
+      setFullName("");
+      setHireDate("");
+
+      setSearchTerm("");
+      setStatusFilter("");
+
+      setSubmitMessage("Đã thêm nhân viên.");
+
+      try {
+        const updatedEmployees = await getEmployees();
+        setEmployees(updatedEmployees);
+      } catch {
+        setSubmitMessage(
+          "Đã thêm nhân viên. Danh sách chưa cập nhật, hãy tải lại trang để xem kết quả.",
+        );
+      }
+    } catch (error) {
+      setSubmitError(
+        error.message || "Không thêm được nhân viên. Vui lòng thử lại.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   if (isLoading) {
     return <p role="status">Đang tải danh sách nhân viên...</p>;
   }
@@ -62,6 +112,69 @@ function EmployeesPage() {
     <main>
       <h1>Nhân viên</h1>
       <p>Đây là nơi quản lý hồ sơ nhân viên.</p>
+      <section className="employee-create">
+        <h2>Thêm nhân viên</h2>
+
+        <form onSubmit={handleCreateEmployee}>
+          <fieldset disabled={isSubmitting}>
+            <legend>Thông tin cơ bản</legend>
+
+            <div>
+              <label htmlFor="new-employee-code">Mã nhân viên</label>
+              <input
+                id="new-employee-code"
+                type="text"
+                maxLength={30}
+                required
+                value={employeeCode}
+                onChange={(event) => setEmployeeCode(event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="new-employee-name">Họ tên</label>
+              <input
+                id="new-employee-name"
+                type="text"
+                maxLength={150}
+                required
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="new-employee-hire-date">Ngày vào làm</label>
+              <input
+                id="new-employee-hire-date"
+                type="date"
+                required
+                value={hireDate}
+                onChange={(event) => setHireDate(event.target.value)}
+              />
+            </div>
+
+            <button type="submit">
+              {isSubmitting ? "Đang xử lý..." : "Lưu nhân viên"}
+            </button>
+          </fieldset>
+
+          {submitError && (
+            <p className="employee-create-error" role="alert">
+              {submitError}
+            </p>
+          )}
+
+          {submitMessage && (
+            <p className="employee-create-message" role="status">
+              {submitMessage}
+            </p>
+          )}
+        </form>
+      </section>
+
+      <EmployeeAssignmentForm employees={employees} />
+
       <div className="employees-search">
         <label htmlFor="employee-search">Tìm nhân viên</label>
 

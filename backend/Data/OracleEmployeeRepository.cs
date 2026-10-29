@@ -1,4 +1,5 @@
 using System.Data;
+using Oracle.ManagedDataAccess.Types;
 using Oracle.ManagedDataAccess.Client;
 using Payroll.Api.Contracts;
 namespace Payroll.Api.Data;
@@ -59,9 +60,72 @@ IsDBNull kiểm tra phòng ban có bị trống trong kết quả Oracle không.
     {
         _connectionFactory = connectionFactory;
     }
+    public async Task<long> CreateEmployeeAsync(
+    long actorId,
+    CreateEmployeeRequest request,
+    CancellationToken cancellationToken)
+{
+    if (request.HireDate is not DateOnly hireDate)
+    {
+        throw new ArgumentException(
+            "Ngày vào làm là bắt buộc.",
+            nameof(request));
+    }
+
+    using var connection = _connectionFactory.CreateConnection();
+    await connection.OpenAsync(cancellationToken);
+
+    using var transaction = connection.BeginTransaction();
+
+    using var command = connection.CreateCommand();
+    command.CommandText = "PAYROLL_APP.PKG_HR_WRITE.create_employee";
+    command.CommandType = CommandType.StoredProcedure;
+    command.BindByName = true;
+
+    command.Parameters.Add("p_actor", OracleDbType.Int64)
+        .Value = actorId;
+
+    command.Parameters.Add("p_employee_code", OracleDbType.Varchar2)
+        .Value = request.EmployeeCode;
+
+    command.Parameters.Add("p_full_name", OracleDbType.Varchar2)
+        .Value = request.FullName;
+
+    command.Parameters.Add("p_hire_date", OracleDbType.Date)
+        .Value = hireDate.ToDateTime(
+            TimeOnly.MinValue,
+            DateTimeKind.Unspecified);
+
+    var employeeIdParameter = command.Parameters.Add(
+        "p_employee_id", OracleDbType.Decimal);
+    employeeIdParameter.Direction = ParameterDirection.Output;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+
+    var oracleId = (OracleDecimal)employeeIdParameter.Value;
+
+    if (oracleId.IsNull || !oracleId.IsInt || !oracleId.IsPositive)
+    {
+        throw new InvalidOperationException(
+            "Oracle trả về mã định danh nhân viên không hợp lệ.");
+    }
+
+    var employeeId = checked((long)oracleId.Value);
+
+    transaction.Commit();
+
+    return employeeId;
+}
 }
 
 /* OracleEmployeeRepository: nơi mình sẽ viết phần gọi Oracle để đọc nhân viên.
 _connectionFactory: giữ công cụ tạo kết nối Oracle mà mình đã xây dựng trước đó.
 OracleEmployeeRepository(...): hàm khởi tạo, chạy khi tạo một đối tượng của lớp này. Nó nhận công cụ tạo kết nối rồi lưu vào _connectionFactory.
 private readonly: biến này dùng bên trong lớp và được gán khi khởi tạo. */
+/* Kiểm tra đã có ngày vào làm.
+Mở kết nối và bắt đầu giao dịch bằng BeginTransaction().
+Truyền năm tham số, khớp với thủ tục Oracle vừa tạo. p_employee_id có hướng Output vì Oracle trả ID về cho mình.
+Chuyển ngày vào làm thành giá trị ngày lúc 00:00:00 để gửi Oracle.
+Gọi thủ tục bằng ExecuteNonQueryAsync().
+Kiểm tra ID nhận về: có giá trị, là số nguyên và lớn hơn 0. Đây là ý nghĩa của IsNull, IsInt, IsPositive. Tài liệu Oracle
+checked kiểm tra ID có nằm trong giới hạn kiểu long; sau đó Commit() xác nhận lưu và return trả ID. */

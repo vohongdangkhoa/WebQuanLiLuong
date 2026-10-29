@@ -33,6 +33,8 @@ builder.Services.AddAntiforgery(options =>
 builder.Services.AddScoped<OracleConnectionFactory>();
 builder.Services.AddScoped<OracleAuthRepository>();
 builder.Services.AddScoped<OracleEmployeeRepository>();
+builder.Services.AddScoped<OracleDepartmentRepository>();
+builder.Services.AddScoped<OracleJobPositionRepository>();
 builder.Services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PayrollCookieEvents>();

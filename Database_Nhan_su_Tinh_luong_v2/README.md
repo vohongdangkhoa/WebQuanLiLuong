@@ -22,13 +22,20 @@ Bản 2.0, ngày 09 tháng 10 năm 2026. Thiết kế phục vụ đồ án củ
 
 1. Mở Docker Desktop và bật container Oracle hiện có. Nếu container tên `oracle23ai`, PowerShell dùng `docker start oracle23ai` khi container đang tắt.
 2. DBeaver tạo kết nối SYSTEM, host `localhost`, port `1521`, Service name `FREEPDB1`, Role Normal. Kiểm tra `SELECT SYS_CONTEXT('USERENV','CON_NAME') FROM dual;` phải ra FREEPDB1.
-3. File `01_admin.sql` dùng lệnh ACCEPT của SQL*Plus. Trong PowerShell mở `docker exec -it oracle23ai sqlplus system@//localhost:1521/FREEPDB1`, nhập mật khẩu khi được hỏi. Chép thư mục SQL vào container rồi chạy file admin, hoặc tự chạy các câu CREATE USER trong DBeaver sau khi thay hai mật khẩu bằng giá trị riêng. Không chạy nguyên ACCEPT trong DBeaver.
+3. File `01_admin.sql` dùng lệnh ACCEPT của SQL\*Plus. Trong PowerShell mở `docker exec -it oracle23ai sqlplus system@//localhost:1521/FREEPDB1`, nhập mật khẩu khi được hỏi. Chép thư mục SQL vào container rồi chạy file admin, hoặc tự chạy các câu CREATE USER trong DBeaver sau khi thay hai mật khẩu bằng giá trị riêng. Không chạy nguyên ACCEPT trong DBeaver.
 4. Tạo PAYROLL_APP và PAYROLL_API. Nếu đã có schema này, dùng schema thử nghiệm khác và đổi các tên trong file admin/grants; không xóa schema đang có dữ liệu.
 5. Kết nối PAYROLL_APP vào FREEPDB1. Kiểm tra user và current schema trước khi chạy file tạo bảng.
-6. Nếu dùng SQL*Plus, chép toàn bộ SQL vào một thư mục và chạy `@00_install_owner.sql`. Nếu dùng DBeaver, chạy các file 02, 03, 04, 05, 06, 06b, 07, 10, 11 lần lượt bằng Execute SQL Script. Cấu hình DBeaver nhận `/` là dấu kết thúc khối PL/SQL; các lệnh SET/WHENEVER/PROMPT/@@ là lệnh SQL*Plus, cần bỏ qua trong DBeaver. Không dùng Ctrl+Enter để chạy cả nhiều khối cùng lúc.
+6. Khi cài database lần đầu trên schema `PAYROLL_APP` còn trống, thực hiện các file theo thứ tự: `02 → 03 → 04 → 05 → 06 → 06b → 07 → 10 → 13 → 14 → 15 → 11`.
+
+   Với SQL\*Plus: đặt các file SQL trong cùng một thư mục, đăng nhập bằng `PAYROLL_APP`, rồi chạy `@00_install_owner.sql`.
+
+   Với DBeaver: dùng kết nối `PAYROLL_APP`. Chạy riêng từng câu lệnh SQL. Với mỗi khối PL/SQL như PACKAGE, PACKAGE BODY hoặc TRIGGER, bôi đen toàn bộ khối, để dòng `/` ngoài vùng chọn, rồi nhấn `Ctrl + Enter`.
+
+   Các lệnh `SET`, `WHENEVER`, `PROMPT` và `@@` dành cho SQL\*Plus.
+
 7. Kiểm tra USER_ERRORS phải không có dòng và USER_OBJECTS không có INVALID. Chưa qua bước này thì dừng; gửi lỗi tên object, line, position, text để sửa.
 8. Chạy `08_demo_data.sql`, rồi `09_oracle_tests.sql`. Test ghi PASS bằng DBMS_OUTPUT, cuối cùng rollback dữ liệu test. Dữ liệu mẫu gốc vẫn còn, số identity có thể nhảy là bình thường.
-9. Kết nối Web bằng PAYROLL_API. Account này chỉ được EXECUTE 5 package công khai; không được sửa hay đọc trực tiếp bảng và không được gọi PKG_PAYROLL_INTERNAL.
+9. Backend kết nối Oracle bằng `PAYROLL_API` và gọi các package công khai đã được cấp quyền `EXECUTE`. Các thao tác đọc/ghi dữ liệu được thực hiện bên trong những package đó. `PKG_PAYROLL_INTERNAL` là gói dùng nội bộ của schema `PAYROLL_APP`.
 
 ### Kiểm tra kết nối
 
@@ -50,7 +57,7 @@ docker cp C:\PayrollDatabase\sql oracle23ai:/tmp/payroll_sql
 docker exec -it oracle23ai sqlplus system@//localhost:1521/FREEPDB1
 ```
 
-Trong SQL*Plus chạy `@/tmp/payroll_sql/01_admin.sql`. Sau đó thoát và đăng nhập PAYROLL_APP, chạy `@/tmp/payroll_sql/00_install_owner.sql`. Không ghi mật khẩu thật vào lịch sử lệnh hoặc Git.
+Trong SQL\*Plus chạy `@/tmp/payroll_sql/01_admin.sql`. Sau đó thoát và đăng nhập PAYROLL_APP, chạy `@/tmp/payroll_sql/00_install_owner.sql`. Không ghi mật khẩu thật vào lịch sử lệnh hoặc Git.
 
 ## Nghiệp vụ đã cố định
 

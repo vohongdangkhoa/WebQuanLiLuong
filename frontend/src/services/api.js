@@ -170,3 +170,98 @@ cache: "no-store": lấy dữ liệu mới từ backend.
 403: tài khoản không có quyền xem nhân viên.
 response.json(): đọc kết quả JSON thành danh sách để React sử dụng.
 export: cho phép trang Nhân viên nhập và gọi hàm này. */
+
+export async function createEmployee(employee) {
+  const csrfToken = await getCsrfToken();
+
+  const response = await fetch(`${API_BASE_URL}/employees`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": csrfToken,
+    },
+    body: JSON.stringify(employee),
+  });
+
+  if (response.status === 401) {
+    throw new Error(
+      "Phiên đăng nhập không còn hợp lệ. Hãy tải lại trang để đăng nhập lại.",
+    );
+  }
+
+  if (response.status === 403) {
+    throw new Error("Bạn không có quyền thêm nhân viên.");
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const validationMessages = data.errors
+      ? Object.values(data.errors).flat()
+      : [];
+
+    throw new Error(
+      data.message ||
+        validationMessages[0] ||
+        data.title ||
+        "Không thêm được nhân viên. Vui lòng thử lại.",
+    );
+  }
+
+  return data;
+}
+
+/* - employee: nhận đối tượng gồm employeeCode, fullName, hireDate.
+- getCsrfToken(): lấy mã CSRF trước khi gửi yêu cầu.
+- credentials: "include": gửi kèm cookie đăng nhập.
+- JSON.stringify(employee): chuyển thông tin nhân viên thành JSON.
+- Kiểm tra phản hồi; nếu thất bại thì lấy thông báo backend gửi về để giao diện hiển thị.
+Dòng .catch(() => ({})) dùng đối tượng rỗng khi phản hồi không đọc được thành JSON, giúp phần xử lý phía sau sử dụng thông báo lỗi dự phòng. */
+
+export async function getDepartments() {
+  const response = await fetch(`${API_BASE_URL}/departments`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    throw new Error(
+      "Phiên đăng nhập không còn hợp lệ. Hãy tải lại trang để đăng nhập lại.",
+    );
+  }
+
+  if (response.status === 403) {
+    throw new Error("Bạn không có quyền xem danh sách phòng ban.");
+  }
+
+  if (!response.ok) {
+    throw new Error("Không tải được danh sách phòng ban. Vui lòng thử lại.");
+  }
+
+  const data = await response.json();
+  return data;
+}
+export async function getJobPositions() {
+  const response = await fetch(`${API_BASE_URL}/job-positions`, {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    throw new Error(
+      "Phiên đăng nhập không còn hợp lệ. Hãy tải lại trang để đăng nhập lại.",
+    );
+  }
+
+  if (response.status === 403) {
+    throw new Error("Bạn không có quyền xem danh sách chức danh.");
+  }
+
+  if (!response.ok) {
+    throw new Error("Không tải được danh sách chức danh. Vui lòng thử lại.");
+  }
+
+  const data = await response.json();
+  return data;
+}

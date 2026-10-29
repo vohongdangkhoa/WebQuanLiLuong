@@ -3,6 +3,16 @@ CREATE OR REPLACE PACKAGE PKG_HR_READ AUTHID DEFINER AS
     p_actor IN NUMBER,
     p_rows OUT SYS_REFCURSOR
   );
+
+   PROCEDURE list_departments(
+    p_actor IN NUMBER,
+    p_rows OUT SYS_REFCURSOR
+  );
+
+  PROCEDURE list_job_positions(
+    p_actor IN NUMBER,
+    p_rows OUT SYS_REFCURSOR
+  );
 END PKG_HR_READ;
 /
 /* 
@@ -40,6 +50,37 @@ CREATE OR REPLACE PACKAGE BODY PKG_HR_READ AS
           ON d.department_id = a.department_id
       ORDER BY e.employee_code;
   END list_employees;
+    PROCEDURE list_departments(
+    p_actor IN NUMBER,
+    p_rows OUT SYS_REFCURSOR
+  ) IS
+  BEGIN
+    PKG_PAYROLL_INTERNAL.require_role(p_actor, 'HR');
+
+    OPEN p_rows FOR
+      SELECT department_id,
+             department_code,
+             department_name
+      FROM DEPARTMENT
+      WHERE is_active = 'Y'
+      ORDER BY department_code;
+    END list_departments;
+
+  PROCEDURE list_job_positions(
+    p_actor IN NUMBER,
+    p_rows OUT SYS_REFCURSOR
+  ) IS
+  BEGIN
+    PKG_PAYROLL_INTERNAL.require_role(p_actor, 'HR');
+
+    OPEN p_rows FOR
+      SELECT position_id,
+             position_code,
+             position_name
+      FROM JOB_POSITION
+      WHERE is_active = 'Y'
+      ORDER BY position_code;
+  END list_job_positions;
 END PKG_HR_READ;
 /
 /* - PACKAGE BODY: nơi viết cách các thủ tục trong gói hoạt động.
