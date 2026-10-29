@@ -101,6 +101,13 @@ function EmployeesPage() {
       setIsSubmitting(false);
     }
   }
+  async function handleAssignmentCreated() {
+    const updatedEmployees = await getEmployees();
+    setEmployees(updatedEmployees);
+
+    setSearchTerm("");
+    setStatusFilter("");
+  }
   if (isLoading) {
     return <p role="status">Đang tải danh sách nhân viên...</p>;
   }
@@ -173,7 +180,10 @@ function EmployeesPage() {
         </form>
       </section>
 
-      <EmployeeAssignmentForm employees={employees} />
+      <EmployeeAssignmentForm
+        employees={employees}
+        onAssignmentCreated={handleAssignmentCreated}
+      />
 
       <div className="employees-search">
         <label htmlFor="employee-search">Tìm nhân viên</label>

@@ -116,6 +116,66 @@ IsDBNull kiểm tra phòng ban có bị trống trong kết quả Oracle không.
 
     return employeeId;
 }
+public async Task<long> CreateAssignmentAsync(
+    long actorId,
+    long employeeId,
+    CreateEmployeeAssignmentRequest request,
+    CancellationToken cancellationToken)
+{
+    if (request.ValidFrom is not DateOnly validFrom)
+    {
+        throw new ArgumentException(
+            "Ngày bắt đầu phân công là bắt buộc.",
+            nameof(request));
+    }
+
+    using var connection = _connectionFactory.CreateConnection();
+    await connection.OpenAsync(cancellationToken);
+
+    using var transaction = connection.BeginTransaction();
+
+    using var command = connection.CreateCommand();
+    command.CommandText = "PAYROLL_APP.PKG_HR_WRITE.create_assignment";
+    command.CommandType = CommandType.StoredProcedure;
+    command.BindByName = true;
+
+    command.Parameters.Add("p_actor", OracleDbType.Int64)
+        .Value = actorId;
+
+    command.Parameters.Add("p_employee_id", OracleDbType.Int64)
+        .Value = employeeId;
+
+    command.Parameters.Add("p_department_id", OracleDbType.Int64)
+        .Value = request.DepartmentId;
+
+    command.Parameters.Add("p_position_id", OracleDbType.Int64)
+        .Value = request.PositionId;
+
+    command.Parameters.Add("p_valid_from", OracleDbType.Date)
+        .Value = validFrom.ToDateTime(
+            TimeOnly.MinValue,
+            DateTimeKind.Unspecified);
+
+    var assignmentIdParameter = command.Parameters.Add(
+        "p_assignment_id", OracleDbType.Decimal);
+    assignmentIdParameter.Direction = ParameterDirection.Output;
+
+    await command.ExecuteNonQueryAsync(cancellationToken);
+
+    var oracleId = (OracleDecimal)assignmentIdParameter.Value;
+
+    if (oracleId.IsNull || !oracleId.IsInt || !oracleId.IsPositive)
+    {
+        throw new InvalidOperationException(
+            "Oracle trả về mã định danh phân công không hợp lệ.");
+    }
+
+    var assignmentId = checked((long)oracleId.Value);
+
+    transaction.Commit();
+
+    return assignmentId;
+}
 }
 
 /* OracleEmployeeRepository: nơi mình sẽ viết phần gọi Oracle để đọc nhân viên.

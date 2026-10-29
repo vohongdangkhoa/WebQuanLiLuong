@@ -123,6 +123,93 @@ catch (OracleException ex) when (ex.Number == 54)
     });
 }
 }
+[HttpPost("{employeeId:long}/assignments")]
+public async Task<IActionResult> CreateAssignment(
+    [FromRoute] long employeeId,
+    [FromBody] CreateEmployeeAssignmentRequest request,
+    CancellationToken cancellationToken)
+{
+    var actorIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (!long.TryParse(
+            actorIdText,
+            NumberStyles.None,
+            CultureInfo.InvariantCulture,
+            out var actorId) ||
+        actorId <= 0)
+    {
+        return Unauthorized();
+    }
+
+    if (employeeId <= 0)
+    {
+        return BadRequest(new
+        {
+            message = "Mã định danh nhân viên không hợp lệ."
+        });
+    }
+
+    try
+    {
+        var assignmentId = await _employeeRepository.CreateAssignmentAsync(
+            actorId,
+            employeeId,
+            request,
+            cancellationToken);
+
+        return StatusCode(StatusCodes.Status201Created, new
+        {
+            assignmentId,
+            message = "Đã phân công nhân viên."
+        });
+    }
+        catch (OracleException ex) when (ex.Number == 20002)
+    {
+        return Forbid();
+    }
+    catch (OracleException ex)
+        when (ex.Number is 20310 or 20311 or 20312 or 20313
+            or 20314 or 20315 or 20316)
+    {
+        var message = ex.Number switch
+        {
+            20310 => "Thông tin nhân viên, phòng ban hoặc chức danh không hợp lệ.",
+            20311 => "Không tìm thấy nhân viên.",
+            20312 => "Chỉ phân công lần đầu cho nhân viên đang làm và chưa có ngày nghỉ việc.",
+            20313 => "Ngày bắt đầu phân công không hợp lệ hoặc trước ngày vào làm.",
+            20314 => "Nhân viên đã có lịch sử phân công. Chức năng này dùng cho phân công lần đầu.",
+            20315 => "Phòng ban không tồn tại hoặc đã ngừng sử dụng.",
+            _ => "Chức danh không tồn tại hoặc đã ngừng sử dụng."
+        };
+
+        if (ex.Number == 20311)
+        {
+            return NotFound(new { message });
+        }
+
+        if (ex.Number is 20312 or 20314)
+        {
+            return Conflict(new { message });
+        }
+
+               return BadRequest(new { message });
+    }
+    catch (OracleException ex)
+        when (ex.Number is 20003 or 20006)
+    {
+        return Conflict(new
+        {
+            message = "Chưa thể phân công vì kỳ lương liên quan đã khóa, đã chốt hoặc đang xử lý."
+        });
+    }
+    catch (OracleException ex) when (ex.Number == 54)
+    {
+        return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+        {
+            message = "Dữ liệu đang được xử lý bởi thao tác khác. Vui lòng thử lại sau."
+        });
+    }
+}
 }
 
 /* - [ApiController]: bật cách xử lý dành cho API.

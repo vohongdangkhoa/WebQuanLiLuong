@@ -91,8 +91,11 @@ CREATE OR REPLACE PACKAGE BODY PKG_HR_WRITE AS
     p_department_id IN NUMBER,
     p_position_id IN NUMBER,
     p_valid_from IN DATE,
-    p_assignment_id OUT NUMBER
+       p_assignment_id OUT NUMBER
   ) IS
+    v_employee EMPLOYEE%ROWTYPE;
+        v_assignment_count NUMBER;
+            v_catalog_active CHAR(1);
   BEGIN
     SAVEPOINT hr_create_assignment;
 
@@ -119,12 +122,102 @@ CREATE OR REPLACE PACKAGE BODY PKG_HR_WRITE AS
         -20313,
         'Assignment start date is required and must not include a time'
       );
-    END IF;
-    RAISE_APPLICATION_ERROR(
-      -20319,
-      'Assignment creation is not ready'
-    );
+      END IF;
+          BEGIN
+      SELECT *
+      INTO v_employee
+      FROM EMPLOYEE
+      WHERE employee_id = p_employee_id
+      FOR UPDATE NOWAIT;
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(
+          -20311,
+          'Employee not found'
+        );
+    END;
 
+    IF v_employee.status <> 'ACTIVE'
+       OR v_employee.termination_date IS NOT NULL THEN
+      RAISE_APPLICATION_ERROR(
+        -20312,
+        'Initial assignment requires an active employee without a termination date'
+      );
+    END IF;
+
+    IF p_valid_from < v_employee.hire_date THEN
+      RAISE_APPLICATION_ERROR(
+        -20313,
+        'Assignment start date must not be before hire date'
+      );
+    END IF;
+    
+        SELECT COUNT(*)
+    INTO v_assignment_count
+    FROM EMPLOYEE_ASSIGNMENT
+    WHERE employee_id = p_employee_id;
+
+    IF v_assignment_count > 0 THEN
+      RAISE_APPLICATION_ERROR(
+        -20314,
+        'Initial assignment is only available for employees without assignment history'
+      );
+    END IF;
+
+        BEGIN
+      SELECT is_active
+      INTO v_catalog_active
+      FROM DEPARTMENT
+      WHERE department_id = p_department_id
+        AND is_active = 'Y'
+      FOR UPDATE NOWAIT;
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(
+          -20315,
+          'Department does not exist or is inactive'
+        );
+    END;
+
+    BEGIN
+      SELECT is_active
+      INTO v_catalog_active
+      FROM JOB_POSITION
+      WHERE position_id = p_position_id
+        AND is_active = 'Y'
+      FOR UPDATE NOWAIT;
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(
+          -20316,
+          'Job position does not exist or is inactive'
+        );
+    END;
+
+        INSERT INTO EMPLOYEE_ASSIGNMENT (
+      employee_id,
+      department_id,
+      position_id,
+      valid_from,
+      valid_to,
+      created_by
+    )
+    VALUES (
+      p_employee_id,
+      p_department_id,
+      p_position_id,
+      p_valid_from,
+      NULL,
+      p_actor
+    )
+    RETURNING assignment_id INTO p_assignment_id;
+
+    PKG_PAYROLL_INTERNAL.audit_event(
+      p_actor,
+      'EMPLOYEE_ASSIGNMENT',
+      p_assignment_id,
+      'CREATE'
+    );
   EXCEPTION
     WHEN OTHERS THEN
       ROLLBACK TO hr_create_assignment;

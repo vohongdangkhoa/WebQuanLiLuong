@@ -265,3 +265,50 @@ export async function getJobPositions() {
   const data = await response.json();
   return data;
 }
+export async function createEmployeeAssignment(employeeId, assignment) {
+  if (!Number.isSafeInteger(employeeId) || employeeId <= 0) {
+    throw new Error("Vui lòng chọn nhân viên hợp lệ.");
+  }
+
+  const csrfToken = await getCsrfToken();
+
+  const response = await fetch(
+    `${API_BASE_URL}/employees/${employeeId}/assignments`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": csrfToken,
+      },
+      body: JSON.stringify(assignment),
+    },
+  );
+
+  if (response.status === 401) {
+    throw new Error(
+      "Phiên đăng nhập không còn hợp lệ. Hãy tải lại trang để đăng nhập lại.",
+    );
+  }
+
+  if (response.status === 403) {
+    throw new Error("Bạn không có quyền phân công nhân viên.");
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const validationMessages = data.errors
+      ? Object.values(data.errors).flat()
+      : [];
+
+    throw new Error(
+      data.message ||
+        validationMessages[0] ||
+        data.title ||
+        "Không lưu được phân công. Vui lòng thử lại.",
+    );
+  }
+
+  return data;
+}
