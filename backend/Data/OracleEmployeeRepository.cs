@@ -28,7 +28,7 @@ public class OracleEmployeeRepository
 
     var employees = new List<EmployeeListItem>();
     var departmentIndex = reader.GetOrdinal("DEPARTMENT_NAME");
-
+    var positionIndex = reader.GetOrdinal("POSITION_NAME");
     while (await reader.ReadAsync(cancellationToken))
     {
         employees.Add(new EmployeeListItem
@@ -37,9 +37,14 @@ public class OracleEmployeeRepository
             EmployeeCode = reader.GetString(reader.GetOrdinal("EMPLOYEE_CODE")),
             FullName = reader.GetString(reader.GetOrdinal("FULL_NAME")),
             DepartmentName = reader.IsDBNull(departmentIndex)
-                ? null
-                : reader.GetString(departmentIndex),
-            Status = reader.GetString(reader.GetOrdinal("STATUS"))
+    ? null
+    : reader.GetString(departmentIndex),
+
+PositionName = reader.IsDBNull(positionIndex)
+    ? null
+    : reader.GetString(positionIndex),
+
+Status = reader.GetString(reader.GetOrdinal("STATUS"))
         });
     }
 
@@ -52,7 +57,60 @@ public class OracleEmployeeRepository
 - Trả danh sách qua return employees.
 IsDBNull kiểm tra phòng ban có bị trống trong kết quả Oracle không. Các dòng using var giúp giải phóng tài nguyên khi kết thúc hàm. */
 
+      public async Task<List<EmployeeAssignmentListItem>> GetEmployeeAssignmentsAsync(
+        long actorId,
+        long employeeId,
+        CancellationToken cancellationToken)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
 
+        using var command = connection.CreateCommand();
+        command.CommandText =
+            "PAYROLL_APP.PKG_HR_READ.list_employee_assignments";
+        command.CommandType = CommandType.StoredProcedure;
+        command.BindByName = true;
+
+        command.Parameters.Add("p_actor", OracleDbType.Int64)
+            .Value = actorId;
+
+        command.Parameters.Add("p_employee_id", OracleDbType.Int64)
+            .Value = employeeId;
+
+        command.Parameters.Add("p_rows", OracleDbType.RefCursor)
+            .Direction = ParameterDirection.Output;
+
+        using var reader =
+            await command.ExecuteReaderAsync(cancellationToken);
+
+        var assignments = new List<EmployeeAssignmentListItem>();
+
+        var assignmentIdIndex = reader.GetOrdinal("ASSIGNMENT_ID");
+        var employeeCodeIndex = reader.GetOrdinal("EMPLOYEE_CODE");
+        var departmentIndex = reader.GetOrdinal("DEPARTMENT_NAME");
+        var positionIndex = reader.GetOrdinal("POSITION_NAME");
+        var validFromIndex = reader.GetOrdinal("VALID_FROM");
+        var validToIndex = reader.GetOrdinal("VALID_TO");
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            assignments.Add(new EmployeeAssignmentListItem
+            {
+                AssignmentId = reader.GetInt64(assignmentIdIndex),
+                EmployeeCode = reader.GetString(employeeCodeIndex),
+                DepartmentName = reader.GetString(departmentIndex),
+                PositionName = reader.GetString(positionIndex),
+                ValidFrom = DateOnly.FromDateTime(
+                    reader.GetDateTime(validFromIndex)),
+                ValidTo = reader.IsDBNull(validToIndex)
+                    ? null
+                    : DateOnly.FromDateTime(
+                        reader.GetDateTime(validToIndex))
+            });
+        }
+
+        return assignments;
+    }
     private readonly OracleConnectionFactory _connectionFactory;
 
     public OracleEmployeeRepository(

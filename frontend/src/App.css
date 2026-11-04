@@ -363,3 +363,57 @@ padding: tạo khoảng trống quanh chữ trong ô.
 .employee-assignment select:disabled {
   background-color: #f1f5f9;
 }
+
+.employee-assignment fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.employee-assignment legend {
+  padding: 0;
+  font-weight: 600;
+}
+
+.employee-assignment button {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border: 0;
+  border-radius: 6px;
+  background-color: #087c21;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.employee-assignment button:hover:not(:disabled) {
+  background-color: #06631a;
+}
+
+.employee-assignment button:focus-visible {
+  outline: 2px solid #080a7c;
+  outline-offset: 3px;
+}
+
+.employee-assignment button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.employee-assignment input:disabled {
+  background-color: #f1f5f9;
+}
+
+.employee-assignment-error {
+  color: #b91c1c;
+  line-height: 1.5;
+}
+
+.employee-assignment-message {
+  color: #166534;
+  line-height: 1.5;
+}

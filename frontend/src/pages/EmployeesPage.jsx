@@ -221,14 +221,14 @@ function EmployeesPage() {
             <th scope="col">Mã nhân viên</th>
             <th scope="col">Họ tên</th>
             <th scope="col">Phòng ban</th>
+            <th scope="col">Chức danh</th>
             <th scope="col">Trạng thái</th>
           </tr>
         </thead>
-
         <tbody>
           {filteredEmployees.length === 0 ? (
             <tr>
-              <td colSpan={4}>
+              <td colSpan={5}>
                 {keyword || statusFilter
                   ? "Không tìm thấy nhân viên phù hợp."
                   : "Chưa có nhân viên."}
@@ -240,6 +240,7 @@ function EmployeesPage() {
                 <td>{employee.employeeCode}</td>
                 <td>{employee.fullName}</td>
                 <td>{employee.departmentName ?? "Chưa phân công"}</td>
+                <td>{employee.positionName ?? "Chưa phân công"}</td>
                 <td>
                   {employeeStatusLabels[employee.status] ?? employee.status}
                 </td>

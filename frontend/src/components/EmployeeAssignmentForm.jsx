@@ -115,6 +115,7 @@ function EmployeeAssignmentForm({ employees, onAssignmentCreated }) {
 
             <select
               id="assignment-employee"
+              required
               value={employeeId}
               onChange={(event) => setEmployeeId(event.target.value)}
               disabled={employees.length === 0}
@@ -135,6 +136,7 @@ function EmployeeAssignmentForm({ employees, onAssignmentCreated }) {
           <label htmlFor="assignment-department">Phòng ban</label>
           <select
             id="assignment-department"
+            required
             value={departmentId}
             onChange={(event) => setDepartmentId(event.target.value)}
             disabled={departments.length === 0}
@@ -159,6 +161,7 @@ function EmployeeAssignmentForm({ employees, onAssignmentCreated }) {
 
             <select
               id="assignment-position"
+              required
               value={positionId}
               onChange={(event) => setPositionId(event.target.value)}
               disabled={jobPositions.length === 0}
@@ -187,6 +190,7 @@ function EmployeeAssignmentForm({ employees, onAssignmentCreated }) {
 
             <input
               id="assignment-valid-from"
+              required
               type="date"
               value={validFrom}
               onChange={(event) => setValidFrom(event.target.value)}

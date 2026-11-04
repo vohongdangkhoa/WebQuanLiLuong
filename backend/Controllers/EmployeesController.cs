@@ -50,6 +50,61 @@ public async Task<IActionResult> GetEmployees(
         return Forbid();
     }
 }
+[HttpGet("{employeeId:long}/assignments")]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+public async Task<IActionResult> GetEmployeeAssignments(
+    [FromRoute] long employeeId,
+    CancellationToken cancellationToken)
+{
+    var actorIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (!long.TryParse(
+            actorIdText,
+            NumberStyles.None,
+            CultureInfo.InvariantCulture,
+            out var actorId) ||
+        actorId <= 0)
+    {
+        return Unauthorized();
+    }
+
+    if (employeeId <= 0)
+    {
+        return BadRequest(new
+        {
+            message = "Mã định danh nhân viên không hợp lệ."
+        });
+    }
+
+    try
+    {
+        var assignments =
+            await _employeeRepository.GetEmployeeAssignmentsAsync(
+                actorId,
+                employeeId,
+                cancellationToken);
+
+        return Ok(assignments);
+    }
+    catch (OracleException ex) when (ex.Number == 20002)
+    {
+        return Forbid();
+    }
+    catch (OracleException ex) when (ex.Number == 20310)
+    {
+        return BadRequest(new
+        {
+            message = "Mã định danh nhân viên không hợp lệ."
+        });
+    }
+    catch (OracleException ex) when (ex.Number == 20311)
+    {
+        return NotFound(new
+        {
+            message = "Không tìm thấy nhân viên."
+        });
+    }
+}
 [HttpPost]
 public async Task<IActionResult> CreateEmployee(
     [FromBody] CreateEmployeeRequest request,
