@@ -47,4 +47,5 @@ D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\93
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\sn1ap305as-{0}-180dmtdpho-180dmtdpho.gz
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\ztffki7eie-{0}-tv8bevkh5j-tv8bevkh5j.gz
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\2fjhodutnv-{0}-g3h7a9wx5y-g3h7a9wx5y.gz
-D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\uhfkcn1xl6-{0}-150ywn4hg5-150ywn4hg5.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\hgizwvzkux-{0}-ne2k2l8qiv-ne2k2l8qiv.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\uhfkcn1xl6-{0}-hyoejgktxl-hyoejgktxl.gz
