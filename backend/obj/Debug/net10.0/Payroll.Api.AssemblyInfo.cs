@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Payroll.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3f803afc6438603d97eab39444169f0c0c20cad7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e541d203f5a17e84f12fb2a991bce395d587b022")]
 [assembly: System.Reflection.AssemblyProductAttribute("Payroll.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Payroll.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

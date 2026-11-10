@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5038/api";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
 /*API_BASE_URL: lưu địa chỉ chung của backend, để mình dùng lại.
 getHealth(): tên hàm kiểm tra backend.
 fetch(...): gửi yêu cầu đến http://localhost:5038/api/health.
@@ -48,7 +48,7 @@ export async function getCurrentUser() {
   }
 
   if (!response.ok) {
-    throw new Error("Không kiểm tra được phiên đăng nhập X .");
+    throw new Error("Không kiểm tra được phiên đăng nhập. Vui lòng thử lại.");
   }
 
   const data = await response.json();
@@ -310,5 +310,65 @@ export async function createEmployeeAssignment(employeeId, assignment) {
     );
   }
 
+  return data;
+}
+
+export class ApiError extends Error {
+  constructor(message, status, details) {
+    super(message); this.name = "ApiError"; this.status = status; this.details = details;
+  }
+}
+export async function apiRequest(path, { method = "GET", body, signal, download = false } = {}) {
+  const headers = {};
+  if (!["GET", "HEAD", "OPTIONS"].includes(method)) headers["X-CSRF-TOKEN"] = await getCsrfToken();
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, { method, headers, body: body === undefined ? undefined : JSON.stringify(body), credentials: "include", cache: "no-store", signal });
+  } catch (error) {
+    if (error.name === "AbortError") throw error;
+    throw new ApiError("Không thể kết nối máy chủ. Hãy kiểm tra kết nối và thử lại.", 0);
+  }
+  if (response.status === 401) window.dispatchEvent(new Event("payroll:session-expired"));
+  if (response.ok && download) {
+    const disposition = response.headers.get("Content-Disposition") || "";
+    const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+    const ordinary = disposition.match(/filename="?([^";]+)"?/i)?.[1];
+    return { blob: await response.blob(), filename: encoded ? decodeURIComponent(encoded) : ordinary || "bao-cao.csv" };
+  }
+  const data = response.status === 204 ? null : await response.json().catch(() => null);
+  if (response.ok && response.status !== 204 && data === null) {
+    throw new ApiError("Phản hồi máy chủ chưa đúng định dạng. Vui lòng tải lại trang và thử lại.", response.status);
+  }
+  if (!response.ok) {
+    const validations = data?.errors ? Object.values(data.errors).flat() : [];
+    const fallback = response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." : response.status === 403 ? "Tài khoản của bạn không có quyền thực hiện thao tác này." : response.status === 404 ? "Không tìm thấy dữ liệu được yêu cầu." : "Chưa thể thực hiện yêu cầu. Vui lòng thử lại.";
+    throw new ApiError(data?.message || validations[0] || data?.title || fallback, response.status, data);
+  }
+  return data;
+}
+export const apiGet = (path, options) => apiRequest(path, options);
+export const apiPost = (path, body) => apiRequest(path, { method: "POST", body });
+export const apiPut = (path, body) => apiRequest(path, { method: "PUT", body });
+export const getEmployeeAssignments = (id) => apiGet(`/employees/${id}/assignments`);
+export function queryString(values) {
+  const params = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== "") params.set(key, String(value)); });
+  return params.size ? `?${params}` : "";
+}
+export function saveDownload({ blob, filename }) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename;
+  document.body.append(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+export async function apiUpload(path, file) {
+  const token = await getCsrfToken();
+  const form = new FormData(); form.append("file", file);
+  let response;
+  try { response = await fetch(`${API_BASE_URL}${path}`, { method: "POST", credentials: "include", headers: { "X-CSRF-TOKEN": token }, body: form }); }
+  catch { throw new ApiError("Không thể tải tệp lên. Vui lòng kiểm tra kết nối.", 0); }
+  const data = await response.json().catch(() => ({}));
+  if (response.status === 401) window.dispatchEvent(new Event("payroll:session-expired"));
+  if (!response.ok) throw new ApiError(data.message || Object.values(data.errors || {}).flat()[0] || data.title || "Không nhập được tệp.", response.status);
   return data;
 }

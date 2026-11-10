@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.local/
+.work/
+artifacts/
+backend/wwwroot/
+**/.env
+**/.env.local
+**/.env.*.local
+*.user
+*.log
+**/appsettings.*.local.json

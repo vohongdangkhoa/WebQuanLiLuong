@@ -41,3 +41,10 @@ D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\bin\Debug\net10.0\runtimes\linu
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\bin\Debug\net10.0\runtimes\osx\lib\net8.0\System.DirectoryServices.Protocols.dll
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\bin\Debug\net10.0\runtimes\win\lib\net8.0\System.DirectoryServices.Protocols.dll
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\Payroll.Api.sourcelink.json
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\bin\Debug\net10.0\Payroll.Api.staticwebassets.runtime.json
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\vggkpp5rzb-{0}-o3661b020b-o3661b020b.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\938z7newx8-{0}-hhxd63xxsa-hhxd63xxsa.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\sn1ap305as-{0}-180dmtdpho-180dmtdpho.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\ztffki7eie-{0}-tv8bevkh5j-tv8bevkh5j.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\2fjhodutnv-{0}-g3h7a9wx5y-g3h7a9wx5y.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\uhfkcn1xl6-{0}-150ywn4hg5-150ywn4hg5.gz

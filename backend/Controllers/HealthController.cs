@@ -15,7 +15,7 @@ public HealthController(OracleConnectionFactory connectionFactory)
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok(new { status = "ok" });
+        return Ok(new { status = "ok", application = "HRFlow" });
     }
     [HttpGet("database")]
 public async Task<IActionResult> GetDatabase(CancellationToken cancellationToken)

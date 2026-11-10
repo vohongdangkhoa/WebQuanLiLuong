@@ -1,312 +1,34 @@
-import { useEffect, useState } from "react";
-import { createEmployee, getEmployees } from "../services/api";
-import EmployeeAssignmentForm from "../components/EmployeeAssignmentForm";
-const employeeStatusLabels = {
-  ACTIVE: "Đang làm việc",
-  INACTIVE: "Không hoạt động",
-  TERMINATED: "Đã nghỉ việc",
-};
-function EmployeesPage() {
-  const [employees, setEmployees] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [employeeCode, setEmployeeCode] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [hireDate, setHireDate] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [submitMessage, setSubmitMessage] = useState("");
-  const keyword = searchTerm.trim().toLowerCase();
+import { useState } from "react";
+import useResource from "../hooks/useResource";
+import useOperation from "../hooks/useOperation";
+import OrganizationCatalog from '../components/OrganizationCatalog';
+import { queryString } from "../services/api";
+import { dateText, today } from "../utils/format";
+import { Button, Card, DataTable, PageHeader, ResourceState, Modal, Tabs, StatusBadge, StatCard } from "../components/ui";
 
-  const filteredEmployees = employees.filter((employee) => {
-    const code = employee.employeeCode.toLowerCase();
-    const name = employee.fullName.toLowerCase();
-
-    const matchesKeyword = code.includes(keyword) || name.includes(keyword);
-
-    const matchesStatus =
-      statusFilter === "" || employee.status === statusFilter;
-
-    return matchesKeyword && matchesStatus;
-  });
-  useEffect(() => {
-    let ignore = false;
-
-    async function loadEmployees() {
-      try {
-        const data = await getEmployees();
-
-        if (!ignore) {
-          setEmployees(data);
-        }
-      } catch (error) {
-        if (!ignore) {
-          setLoadError(error.message || "Không tải được danh sách nhân viên.");
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadEmployees();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-  async function handleCreateEmployee(event) {
-    event.preventDefault();
-
-    if (isSubmitting) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitError("");
-    setSubmitMessage("");
-
-    try {
-      await createEmployee({
-        employeeCode: employeeCode.trim(),
-        fullName: fullName.trim(),
-        hireDate,
-      });
-
-      setEmployeeCode("");
-      setFullName("");
-      setHireDate("");
-
-      setSearchTerm("");
-      setStatusFilter("");
-
-      setSubmitMessage("Đã thêm nhân viên.");
-
-      try {
-        const updatedEmployees = await getEmployees();
-        setEmployees(updatedEmployees);
-      } catch {
-        setSubmitMessage(
-          "Đã thêm nhân viên. Danh sách chưa cập nhật, hãy tải lại trang để xem kết quả.",
-        );
-      }
-    } catch (error) {
-      setSubmitError(
-        error.message || "Không thêm được nhân viên. Vui lòng thử lại.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-  async function handleAssignmentCreated() {
-    const updatedEmployees = await getEmployees();
-    setEmployees(updatedEmployees);
-
-    setSearchTerm("");
-    setStatusFilter("");
-  }
-  if (isLoading) {
-    return <p role="status">Đang tải danh sách nhân viên...</p>;
-  }
-
-  if (loadError) {
-    return <p role="alert">{loadError}</p>;
-  }
-  return (
-    <main>
-      <h1>Nhân viên</h1>
-      <p>Đây là nơi quản lý hồ sơ nhân viên.</p>
-      <section className="employee-create">
-        <h2>Thêm nhân viên</h2>
-
-        <form onSubmit={handleCreateEmployee}>
-          <fieldset disabled={isSubmitting}>
-            <legend>Thông tin cơ bản</legend>
-
-            <div>
-              <label htmlFor="new-employee-code">Mã nhân viên</label>
-              <input
-                id="new-employee-code"
-                type="text"
-                maxLength={30}
-                required
-                value={employeeCode}
-                onChange={(event) => setEmployeeCode(event.target.value)}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="new-employee-name">Họ tên</label>
-              <input
-                id="new-employee-name"
-                type="text"
-                maxLength={150}
-                required
-                value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="new-employee-hire-date">Ngày vào làm</label>
-              <input
-                id="new-employee-hire-date"
-                type="date"
-                required
-                value={hireDate}
-                onChange={(event) => setHireDate(event.target.value)}
-              />
-            </div>
-
-            <button type="submit">
-              {isSubmitting ? "Đang xử lý..." : "Lưu nhân viên"}
-            </button>
-          </fieldset>
-
-          {submitError && (
-            <p className="employee-create-error" role="alert">
-              {submitError}
-            </p>
-          )}
-
-          {submitMessage && (
-            <p className="employee-create-message" role="status">
-              {submitMessage}
-            </p>
-          )}
-        </form>
-      </section>
-
-      <EmployeeAssignmentForm
-        employees={employees}
-        onAssignmentCreated={handleAssignmentCreated}
-      />
-
-      <div className="employees-search">
-        <label htmlFor="employee-search">Tìm nhân viên</label>
-
-        <input
-          id="employee-search"
-          type="search"
-          placeholder="Nhập mã hoặc họ tên nhân viên"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
-      </div>
-      <div className="employees-status-filter">
-        <label htmlFor="employee-status">Trạng thái</label>
-
-        <select
-          id="employee-status"
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
-        >
-          <option value="">Tất cả trạng thái</option>
-
-          {Object.entries(employeeStatusLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <table className="employees-table">
-        <caption>Danh sách nhân viên</caption>
-
-        <thead>
-          <tr>
-            <th scope="col">Mã nhân viên</th>
-            <th scope="col">Họ tên</th>
-            <th scope="col">Phòng ban</th>
-            <th scope="col">Chức danh</th>
-            <th scope="col">Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredEmployees.length === 0 ? (
-            <tr>
-              <td colSpan={5}>
-                {keyword || statusFilter
-                  ? "Không tìm thấy nhân viên phù hợp."
-                  : "Chưa có nhân viên."}
-              </td>
-            </tr>
-          ) : (
-            filteredEmployees.map((employee) => (
-              <tr key={employee.employeeId}>
-                <td>{employee.employeeCode}</td>
-                <td>{employee.fullName}</td>
-                <td>{employee.departmentName ?? "Chưa phân công"}</td>
-                <td>{employee.positionName ?? "Chưa phân công"}</td>
-                <td>
-                  {employeeStatusLabels[employee.status] ?? employee.status}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </main>
-  );
+export default function EmployeesPage() {
+  const resource = useResource("/employees"); const catalogs = useResource("/hr/catalogs"); const [status, setStatus] = useState(""); const [selected, setSelected] = useState(null);
+  const [showCatalog, setShowCatalog] = useState(false);
+  function refresh() { resource.reload(); catalogs.reload(); }
+  const operation = useOperation(refresh);
+  const employees = resource.data || []; const visible = employees.filter((row) => !status || row.status === status);
+  const departmentOptions = (catalogs.data?.departments || []).map((row) => ({ value: row.departmentId, label: row.departmentName }));
+  const positionOptions = (catalogs.data?.positions || []).map((row) => ({ value: row.positionId, label: row.positionName }));
+  const assignmentFields = [{ name: "departmentId", label: "Phòng ban", type: "select", numeric: true, required: true, options: departmentOptions }, { name: "positionId", label: "Chức danh", type: "select", numeric: true, required: true, options: positionOptions }, { name: "validFrom", label: "Ngày bắt đầu", type: "date", required: true, defaultValue: today() }];
+  function newEmployee() { operation.open({ title: "Thêm nhân viên", description: "Tạo hồ sơ trước khi phân công phòng ban và thiết lập hợp đồng.", endpoint: "/employees", submitLabel: "Tạo hồ sơ", fields: [{ name: "employeeCode", label: "Mã nhân viên", required: true, maxLength: 30, placeholder: "Ví dụ: NV006" }, { name: "fullName", label: "Họ và tên", required: true, maxLength: 150 }, { name: "hireDate", label: "Ngày vào làm", required: true, type: "date", defaultValue: today() }] }); }
+  function assign(row) { operation.open({ title: `Phân công · ${row.employeeCode}`, description: row.fullName, endpoint: `/employees/${row.employeeId}/assignments`, submitLabel: "Lưu phân công", fields: assignmentFields, warning: "Dùng cho nhân viên chưa có lịch sử phân công. Ngày bắt đầu phải từ ngày vào làm trở đi." }); }
+  function transfer(row) { operation.open({ title: `Chuyển công tác · ${row.employeeCode}`, description: row.fullName, endpoint: `/hr/employees/${row.employeeId}/transfer`, submitLabel: "Xác nhận chuyển công tác", fields: [...assignmentFields, { name: "reason", label: "Lý do chuyển công tác", type: "textarea", required: true }], warning: "Phân công cũ sẽ kết thúc tại ngày phân công mới bắt đầu. Các kỳ lương đã duyệt vẫn được bảo toàn." }); }
+  return <><PageHeader eyebrow="QUẢN LÝ NHÂN SỰ" title="Nhân viên" description="Hồ sơ đội ngũ, chức danh và lịch sử phân công."><Button variant="secondary" icon="refresh" onClick={refresh}>Làm mới</Button><Button variant="secondary" onClick={() => setShowCatalog(true)}>Danh mục tổ chức</Button><Button icon="plus" onClick={newEmployee}>Thêm nhân viên</Button></PageHeader>{operation.notice}<div className="stats-grid stats-three"><StatCard label="Tổng hồ sơ" value={employees.length} icon="employees" /><StatCard label="Đang làm việc" value={employees.filter((row) => row.status === "ACTIVE").length} icon="check" tone="teal" /><StatCard label="Chưa phân công" value={employees.filter((row) => !row.departmentName).length} icon="building" tone="amber" /></div><Card title="Danh sách nhân viên" actions={<select className="compact-select" aria-label="Lọc trạng thái nhân viên" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">Tất cả trạng thái</option><option value="ACTIVE">Đang làm việc</option><option value="INACTIVE">Không hoạt động</option><option value="TERMINATED">Đã nghỉ việc</option></select>}><ResourceState resource={resource}><DataTable rows={visible} rowKey="employeeId" caption="Danh sách nhân viên" exportName="danh-sach-nhan-vien.csv" columns={[{ key: "employeeCode", label: "Mã nhân viên", render: (value) => <span className="code-label">{value}</span> }, { key: "fullName", label: "Họ và tên", render: (value, row) => <div className="person-cell"><span className="avatar avatar-small">{value.split(" ").slice(-1)[0].slice(0, 2).toUpperCase()}</span><div><strong>{value}</strong><small>{row.positionName || "Chưa có chức danh"}</small></div></div> }, { key: "departmentName", label: "Phòng ban", render: (value) => value || <span className="muted">Chưa phân công</span> }, { key: "status", label: "Trạng thái" }]} actions={(row) => <div className="row-buttons"><Button variant="ghost" onClick={() => setSelected(row)}>Hồ sơ</Button>{row.status === "ACTIVE" && (row.departmentName ? <Button variant="ghost" disabled={!catalogs.data} onClick={() => transfer(row)}>Chuyển công tác</Button> : <Button variant="ghost" disabled={!catalogs.data} onClick={() => assign(row)}>Phân công</Button>)}</div>} /></ResourceState></Card>{showCatalog && <OrganizationCatalog onClose={() => setShowCatalog(false)} onSaved={refresh} />}{operation.dialog}{selected && <EmployeeDetail employee={selected} onClose={() => setSelected(null)} onSaved={resource.reload} />}</>;
 }
 
-export default EmployeesPage;
-
-/* - employees: giữ danh sách nhân viên. Ban đầu là [], tức danh sách rỗng. setEmployees dùng để cập nhật danh sách.
-- isLoading: cho biết đang tải dữ liệu hay không. Ban đầu là true. setIsLoading dùng để đổi trạng thái này.
-- loadError: giữ thông báo lỗi. Ban đầu là chuỗi rỗng "". setLoadError dùng để cập nhật thông báo.
-useState giúp React nhớ các giá trị này và cập nhật giao diện khi mình gọi các hàm set.... */
-
-/* useEffect: bắt đầu tải dữ liệu khi trang được đưa lên giao diện.
-await getEmployees(): chờ danh sách từ backend.
-setEmployees(data): lưu danh sách nhận được.
-catch: lưu thông báo nếu gặp lỗi.
-finally: kết thúc trạng thái đang tải.
-ignore: giúp bỏ qua kết quả đến muộn khi bạn đã rời trang. */
-
-/* employees.length === 0: danh sách rỗng thì hiện “Chưa có nhân viên”.
-employees.map(...): tạo một dòng <tr> cho mỗi nhân viên.
-key={employee.employeeId}: giúp React nhận diện từng dòng.
-?? "Chưa phân công": hiện chữ này nếu tên phòng ban nhận được là null. */
-
-/* htmlFor và id giống nhau để nối nhãn với ô nhập.
-type="search": ô nhập dành cho tìm kiếm.
-value={searchTerm}: hiển thị nội dung đang lưu trong state.
-onChange: mỗi lần gõ, cập nhật searchTerm bằng nội dung mới. */
-
-/* - trim(): bỏ khoảng trắng thừa ở đầu và cuối.
-- toLowerCase(): chuyển về chữ thường để tìm không phân biệt hoa/thường.
-- filter(...): tạo danh sách những nhân viên khớp từ khóa.
-- ||: chỉ cần mã hoặc họ tên chứa từ khóa là được chọn.
-2. Trong <tbody>, đổi đúng hai chỗ:
-- employees.length === 0 thành filteredEmployees.length === 0.
-- employees.map thành filteredEmployees.map. */
-/* 
-Gõ nv002: chỉ hiện nhân viên NV002.
-Gõ huy: cũng hiện nhân viên NV002.
-Gõ zzz: hiện thông báo không tìm thấy.
-Xóa hết nội dung: hiện lại đủ ba nhân viên. */
-
-/* - filteredEmployees.length: kiểm tra kết quả lọc có rỗng không.
-- filteredEmployees.map: vẽ các nhân viên khớp từ khóa.
-2. Nhấn Ctrl + S, rồi thử lại:
-- Gõ nv002: chỉ còn một dòng NV002.
-- Gõ zzz: hiện thông báo không tìm thấy.
-- Xóa hết chữ: hiện lại ba nhân viên. */
-/* 
-<select>: tạo ô chọn.
-<option>: mỗi lựa chọn trong ô.
-value và onChange: lưu lựa chọn vào statusFilter.
-Object.entries(employeeStatusLabels): chuyển bảng tên trạng thái thành các cặp mã và nhãn, chẳng hạn ["ACTIVE", "Đang làm việc"].
-.map(...): tạo một lựa chọn cho mỗi cặp đó. */
-
-/* matchesKeyword: mã hoặc họ tên có chứa từ khóa.
-matchesStatus: chọn “Tất cả” hoặc trạng thái nhân viên đúng với lựa chọn.
-&&: phải thỏa mãn cả hai điều kiện mới được hiển thị. */
-/* Xóa từ khóa, chọn Đang làm việc → hiện ba nhân viên.
-Chọn Đã nghỉ việc → báo không tìm thấy.
-Chọn Tất cả trạng thái, gõ nv002 → hiện một nhân viên.
-Giữ nv002, chọn Không hoạt động → báo không tìm thấy. */
+function EmployeeDetail({ employee, onClose, onSaved }) {
+  const [tab, setTab] = useState("profile");
+  const profile = useResource(`/hr/employees/${employee.employeeId}`);
+  const history = useResource(`/employees/${employee.employeeId}/assignments`);
+  const bank = useResource(`/bank-accounts${queryString({ employeeId: employee.employeeId })}`);
+  const operation = useOperation(() => { profile.reload(); history.reload(); bank.reload(); onSaved(); });
+  const data = profile.data;
+  function edit() { operation.open({ title: "Cập nhật hồ sơ", endpoint: `/hr/employees/${employee.employeeId}`, method: "PUT", submitLabel: "Lưu hồ sơ", initial: data || {}, fields: [{ name: "fullName", label: "Họ tên", required: true, maxLength: 150 }, { name: "email", label: "Email", type: "email", nullable: true, maxLength: 200 }, { name: "birthDate", label: "Ngày sinh", type: "date", nullable: true }, { name: "status", label: "Trạng thái", type: "select", required: true, options: [{ value: "ACTIVE", label: "Đang làm việc" }, { value: "INACTIVE", label: "Không hoạt động" }, { value: "TERMINATED", label: "Đã nghỉ việc" }] }, { name: "terminationDate", label: "Ngày cuối cùng làm việc", type: "date", nullable: true, hint: "Bắt buộc khi chọn Đã nghỉ việc." }], transform: (values) => ({ ...values, rowVersion: data.rowVersion }) }); }
+  function addBank() { operation.open({ title: "Thêm tài khoản nhận lương", endpoint: "/bank-accounts", submitLabel: "Lưu tài khoản", warning: "Số tài khoản được mã hóa khi lưu. Hãy kiểm tra kỹ thông tin để tránh giao dịch bị ngân hàng từ chối.", fields: [{ name: "bankCode", label: "Mã ngân hàng", required: true, maxLength: 30, placeholder: "Ví dụ: VCB" }, { name: "accountHolder", label: "Chủ tài khoản", required: true, maxLength: 150 }, { name: "accountNumber", label: "Số tài khoản", required: true, minLength: 6, maxLength: 34 }, { name: "validFrom", label: "Ngày hiệu lực", type: "date", required: true, defaultValue: today() }], transform: (values) => ({ ...values, employeeId: employee.employeeId }) }); }
+  return <Modal wide title={employee.fullName} description={`${employee.employeeCode} · ${employee.departmentName || "Chưa phân công"}`} onClose={onClose}><Tabs tabs={[{ value: "profile", label: "Thông tin cá nhân" }, { value: "history", label: "Lịch sử phân công" }, { value: "bank", label: "Tài khoản nhận lương" }]} value={tab} onChange={setTab} />{operation.notice}{tab === "profile" && <ResourceState resource={profile}>{data && <><div className="detail-grid"><div><span>Mã nhân viên</span><strong>{data.employeeCode}</strong></div><div><span>Họ và tên</span><strong>{data.fullName}</strong></div><div><span>Email</span><strong>{data.email || "Chưa bổ sung"}</strong></div><div><span>Ngày sinh</span><strong>{dateText(data.birthDate)}</strong></div><div><span>Ngày vào làm</span><strong>{dateText(data.hireDate)}</strong></div><div><span>Trạng thái</span><StatusBadge value={data.status} /></div><div><span>Ngày cuối cùng làm việc</span><strong>{dateText(data.terminationDate)}</strong></div></div><div className="form-actions"><Button onClick={edit}>Chỉnh sửa hồ sơ</Button></div></>}</ResourceState>}{tab === "history" && <><p className="section-note">Ngày kết thúc là ngày đầu tiên phân công không còn áp dụng. “Chưa giới hạn” không đồng nghĩa với phân công đã bắt đầu.</p><ResourceState resource={history}><DataTable rows={history.data || []} rowKey="assignmentId" searchable={false} columns={[{ key: "departmentName", label: "Phòng ban" }, { key: "positionName", label: "Chức danh" }, { key: "validFrom", label: "Từ ngày" }, { key: "validTo", label: "Đến trước ngày", render: (value) => value ? dateText(value) : <span className="muted">Chưa giới hạn</span> }]} /></ResourceState></>}{tab === "bank" && <><div className="section-toolbar"><p className="section-note">Thông tin nhận lương được lưu theo thời gian hiệu lực.</p><Button icon="plus" onClick={addBank}>Thêm tài khoản</Button></div><ResourceState resource={bank}><DataTable rows={bank.data || []} searchable={false} /></ResourceState></>}{operation.dialog}</Modal>;
+}

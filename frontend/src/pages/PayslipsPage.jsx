@@ -1,10 +1,12 @@
-function PayslipsPage() {
-  return (
-    <main>
-      <h1>Phiếu lương</h1>
-      <p>Xem thu nhập, các khoản khấu trừ và trạng thái thanh toán.</p>
-    </main>
-  );
+import { useState } from "react";
+import useResource from "../hooks/useResource";
+import { money, dateText, periodLabel } from "../utils/format";
+import { Button, Card, DataTable, Modal, PageHeader, ResourceState, StatusBadge } from "../components/ui";
+export default function PayslipsPage() {
+  const resource = useResource("/finance/payslips"); const [selected, setSelected] = useState(null);
+  return <><PageHeader eyebrow="THU NHẬP CỦA BẠN" title="Phiếu lương của tôi" description="Phiếu lương được công bố sau phê duyệt. Tình trạng trả tiền được theo dõi riêng."><Button variant="secondary" icon="refresh" onClick={resource.reload}>Làm mới</Button></PageHeader><Card title="Các kỳ lương đã phát hành"><ResourceState resource={resource}><DataTable rows={resource.data || []} rowKey="resultId" emptyTitle="Bạn chưa có phiếu lương được phát hành" emptyDescription="Phiếu lương sẽ xuất hiện khi bảng lương của bạn được phê duyệt." columns={[{ key: "periodStart", label: "Kỳ lương", render: (_, row) => periodLabel(row) }, { key: "grossAmount", label: "Tổng thu nhập", align: "right" }, { key: "employeeInsurance", label: "Bảo hiểm", align: "right" }, { key: "pitAmount", label: "Thuế TNCN", align: "right" }, { key: "otherDeduction", label: "Khấu trừ khác", align: "right" }, { key: "netAmount", label: "Thực lĩnh", align: "right" }, { key: "paymentStatus", label: "Thanh toán" }]} actions={(row) => <Button variant="ghost" onClick={() => setSelected(row)}>Xem phiếu</Button>} /></ResourceState></Card>{selected && <PayslipDetail slip={selected} onClose={() => setSelected(null)} />}</>;
 }
-
-export default PayslipsPage;
+function PayslipDetail({ slip, onClose }) {
+  const resource = useResource(`/finance/payslips/${slip.resultId}/items`);
+  return <Modal wide title={`Phiếu lương · ${periodLabel(slip)}`} description={`Phát hành ${dateText(slip.issuedAt)}`} onClose={onClose}><div className="print-header"><div><h3>PHIẾU LƯƠNG</h3><p>{periodLabel(slip)}</p></div><StatusBadge value={slip.paymentStatus} /></div><div className="inline-stats"><div><span>Tổng thu nhập</span><strong>{money(slip.grossAmount)}</strong></div><div><span>Bảo hiểm nhân viên</span><strong>{money(slip.employeeInsurance)}</strong></div><div><span>Thuế TNCN</span><strong>{money(slip.pitAmount)}</strong></div><div><span>Thực lĩnh</span><strong>{money(slip.netAmount)}</strong></div></div><ResourceState resource={resource}><DataTable rows={resource.data || []} searchable={false} exportName={`phieu-luong-${slip.resultId}.csv`} columns={[{ key: "componentCodeSnapshot", label: "Khoản lương" }, { key: "kindSnapshot", label: "Loại" }, { key: "sourceDate", label: "Ngày" }, { key: "amount", label: "Số tiền", align: "right" }, { key: "formulaSnapshot", label: "Diễn giải" }]} /></ResourceState><p className="section-note">Phiếu lương phản ánh phiên bản đã phê duyệt. Trạng thái thanh toán thể hiện kết quả đối soát riêng với ngân hàng.</p><div className="form-actions"><Button variant="secondary" onClick={() => window.print()}>In phiếu lương</Button><Button onClick={onClose}>Đóng</Button></div></Modal>;
+}

@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Payroll.Api.Controllers;
 
@@ -37,6 +38,7 @@ public IActionResult GetCsrfToken()  /**/
 }
 /*phần nhận và kiểm tra thông tin đăng nhập trước, rồi bước kế thêm phần tạo cookie.*/
 [HttpPost("login")] /*[HttpPost("login")]: tạo API POST /api/auth/login để React gửi thông tin đăng nhập.*/
+[EnableRateLimiting("login")]
 [AllowAnonymous] 
 public async Task<IActionResult> Login(
     [FromBody] LoginRequest request,

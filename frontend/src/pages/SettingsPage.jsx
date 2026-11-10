@@ -1,0 +1,8 @@
+import useAuth from "../hooks/useAuth";
+import { roleLabels } from "../utils/format";
+import { Card, PageHeader } from "../components/ui";
+import ActionForm from "../components/ActionForm";
+export default function SettingsPage() {
+  const { user } = useAuth();
+  return <><PageHeader eyebrow="TÀI KHOẢN" title="Cài đặt tài khoản" description="Thông tin truy cập và bảo mật phiên đăng nhập." /><Card title="Thông tin đăng nhập"><div className="card-body detail-grid"><div><span>Tên đăng nhập</span><strong>{user.username}</strong></div><div><span>Vai trò</span><strong>{user.roles.map((role) => roleLabels[role] || role).join(" · ")}</strong></div></div></Card><Card title="Đổi mật khẩu" description="Các phiên đăng nhập hiện tại sẽ kết thúc sau khi đổi mật khẩu."><div className="card-body"><ActionForm endpoint="/auth/password" submitLabel="Đổi mật khẩu" warning="Sử dụng từ 8 đến 50 ký tự và chọn mật khẩu khác mật khẩu hiện tại." fields={[{ name: "currentPassword", label: "Mật khẩu hiện tại", type: "password", required: true, maxLength: 50, autoComplete: "current-password" }, { name: "newPassword", label: "Mật khẩu mới", type: "password", required: true, minLength: 8, maxLength: 50, autoComplete: "new-password" }, { name: "confirmPassword", label: "Nhập lại mật khẩu mới", type: "password", required: true, minLength: 8, maxLength: 50, autoComplete: "new-password" }]} transform={(values) => { if (values.newPassword !== values.confirmPassword) throw new Error("Hai lần nhập mật khẩu mới chưa khớp."); return { currentPassword: values.currentPassword, newPassword: values.newPassword }; }} onSuccess={() => window.dispatchEvent(new Event("payroll:session-expired"))} /></div></Card></>;
+}

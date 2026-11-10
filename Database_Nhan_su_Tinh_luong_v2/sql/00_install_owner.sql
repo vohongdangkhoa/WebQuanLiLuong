@@ -16,6 +16,11 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK;
 @@13_auth.sql
 @@14_hr_read.sql
 @@15_hr_write.sql
+@@16_platform.sql
+@@17_hr_portal.sql
+@@18_finance_portal.sql
+@@19_configuration.sql
+@@20_payroll_withdraw.sql
 
 DECLARE
   v_n NUMBER;

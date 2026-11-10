@@ -1,124 +1,13 @@
 import { useState } from "react";
+import { Navigate, useLocation } from "react-router";
 import useAuth from "../hooks/useAuth";
-import { Navigate } from "react-router";
-
+import { Alert, Button, Field, Icon, Loading } from "../components/ui";
+const COPYRIGHT_YEAR = new Date().getFullYear();
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  /* isSubmitting: đang gửi yêu cầu đăng nhập hay không.
-loginError: thông báo lỗi đăng nhập.
-signIn: hàm đăng nhập lấy từ AuthProvider. */
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loginError, setLoginError] = useState("");
-
-  const { user, signIn } = useAuth();
-
-  /* event.preventDefault(): ngăn trình duyệt tự gửi biểu mẫu và tải lại trang.
-if (isSubmitting): chặn gửi thêm khi yêu cầu trước đang được xử lý.
-setLoginError(""): xóa thông báo lỗi cũ.
-await signIn(...): gửi tên đăng nhập và mật khẩu đến backend.
-catch: lưu thông báo nếu đăng nhập thất bại.
-finally: kết thúc trạng thái đang gửi. */
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    if (isSubmitting) {
-      return;
-    }
-
-    setLoginError("");
-    setIsSubmitting(true);
-
-    try {
-      await signIn(username, password);
-    } catch (error) {
-      setLoginError(error.message || "Đăng nhập không thành công.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  /* - Đăng nhập thành công → AuthProvider cập nhật user.
-- LoginPage nhận được user mới và chạy lại.
-- if (user) đúng → chuyển sang đường dẫn /, tức trang Tổng quan.
-Trong <Navigate />, to="/" là địa chỉ cần chuyển đến; replace thay mục hiện tại trong lịch sử trình duyệt bằng địa chỉ mới */
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-  /* LoginPage: component đại diện cho trang đăng nhập.
-main: phần nội dung chính của trang.
-section: gom nội dung của khung đăng nhập.
-className: đặt tên để mình viết CSS trang trí sau.
-aria-labelledby="login-title": dùng tiêu đề có id="login-title" làm tên cho phần này, giúp công cụ đọc màn hình nhận biết. */
-  return (
-    <main className="login-page">
-      <section className="login-card" aria-labelledby="login-title">
-        <h1 id="login-title">Đăng nhập</h1>
-        <p>Hệ thống quản lý nhân sự và tính lương</p>
-
-        {/* value: nội dung hiện trong ô nhập.
-onChange: mỗi khi bạn gõ, lưu nội dung mới vào biến tương ứng.
-maxLength={50}: cho nhập tối đa 50 ký tự.
-required: yêu cầu nhập nội dung khi gửi biểu mẫu.
-type="password": che các ký tự mật khẩu.
-htmlFor trùng với id: liên kết nhãn với đúng ô nhập. */}
-
-        <form onSubmit={handleSubmit}>
-          <div className="login-field">
-            <label htmlFor="login-username">Tên đăng nhập</label>
-
-            <input
-              id="login-username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              maxLength={50}
-              disabled={isSubmitting}
-              required
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-            />
-          </div>
-
-          <div className="login-field">
-            <label htmlFor="login-password">Mật khẩu</label>
-
-            <input
-              id="login-password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              maxLength={50}
-              disabled={isSubmitting}
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </div>
-
-          {/* loginError && (...): có thông báo lỗi thì hiển thị nó.
-type="submit": bấm nút sẽ gửi biểu mẫu và gọi handleSubmit.
-disabled={isSubmitting}: tạm khóa nút khi đang gửi.
-Dòng chữ trên nút đổi thành “Đang đăng nhập...” trong lúc chờ backend. */}
-
-          {loginError && (
-            <p className="login-error" role="alert">
-              {loginError}
-            </p>
-          )}
-
-          <button
-            className="login-submit"
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
-          </button>
-        </form>
-      </section>
-    </main>
-  );
+  const { user, signIn, isChecking, sessionError, retrySession } = useAuth(); const location = useLocation();
+  const [username, setUsername] = useState(""); const [password, setPassword] = useState(""); const [showPassword, setShowPassword] = useState(false); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  async function submit(event) { event.preventDefault(); if (busy) return; setBusy(true); setError(""); try { await signIn(username, password); } catch (failure) { setError(failure.message); } finally { setBusy(false); } }
+  if (isChecking) return <div className="session-screen"><Loading text="Đang xác nhận phiên đăng nhập…" /></div>;
+  if (user) return <Navigate to={location.state?.from || "/"} replace />;
+  return <main className="login-page"><section className="login-story"><div className="login-brand"><span className="brand-mark"><Icon name="building" size={28} /></span>HR<span>Flow</span></div><div className="login-story-copy"><div className="eyebrow">CON NGƯỜI LÀ TRUNG TÂM</div><h1>Một nơi cho<br />đội ngũ của bạn.</h1><p>Kết nối hồ sơ nhân sự, công làm việc và tiền lương trong một quy trình thống nhất.</p><div className="login-features"><span><Icon name="check" />Quản lý hồ sơ & hợp đồng</span><span><Icon name="check" />Chấm công & phê duyệt</span><span><Icon name="check" />Tính lương & thanh toán</span></div></div><div className="login-security"><Icon name="shield" />Truy cập được bảo vệ theo vai trò</div><div className="login-orbit orbit-one" /><div className="login-orbit orbit-two" /></section><section className="login-form-side"><div className="login-card"><div className="eyebrow">CHÀO MỪNG TRỞ LẠI</div><h2>Đăng nhập hệ thống</h2><p>Sử dụng tài khoản được cấp để tiếp tục.</p>{sessionError ? <><Alert>{sessionError}</Alert><Button onClick={retrySession}>Kết nối lại</Button></> : <form onSubmit={submit}><fieldset disabled={busy}><Field label="Tên đăng nhập">{(id) => <input id={id} name="username" autoComplete="username" required maxLength={50} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Nhập tên đăng nhập" />}</Field><Field label="Mật khẩu">{(id) => <div className="password-field"><input id={id} name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required maxLength={50} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Nhập mật khẩu" /><button type="button" aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"} onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Ẩn" : "Hiện"}</button></div>}</Field></fieldset><Alert>{error}</Alert><Button type="submit" className="login-submit" disabled={busy}>{busy ? "Đang đăng nhập…" : "Đăng nhập"}<Icon name="arrow" size={17} /></Button></form>}<div className="login-help">Chưa có tài khoản? Liên hệ người quản lý hệ thống.</div></div><footer>© {COPYRIGHT_YEAR} HRFlow. Quản lý nhân sự và tiền lương.</footer></section></main>;
 }

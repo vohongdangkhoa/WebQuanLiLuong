@@ -1,10 +1,12 @@
-function ReportsPage() {
-  return (
-    <main>
-      <h1>Báo cáo</h1>
-      <p>Tổng hợp thông tin lương và chi phí nhân sự theo kỳ.</p>
-    </main>
-  );
+import { useState } from "react";
+import useResource from "../hooks/useResource";
+import { apiRequest, queryString, saveDownload } from "../services/api";
+import { money, periodLabel } from "../utils/format";
+import { Alert, Button, Card, DataTable, PageHeader, ResourceState, SelectField, StatCard } from "../components/ui";
+export default function ReportsPage() {
+  const [periodId, setPeriodId] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  const periods = useResource("/finance/periods"); const resource = useResource(`/finance/reports${queryString({ periodId })}`); const rows = resource.data || [];
+  const total = (key) => rows.reduce((sum, row) => sum + Number(row[key] || 0), 0);
+  async function download() { if (busy) return; setBusy(true); setError(""); try { saveDownload(await apiRequest(`/finance/reports/export${queryString({ periodId })}`, { download: true })); } catch (failure) { setError(failure.message); } finally { setBusy(false); } }
+  return <><PageHeader eyebrow="DỮ LIỆU & PHÂN TÍCH" title="Báo cáo tiền lương" description="Tổng hợp chi phí theo phòng ban từ các phiên bản đã phê duyệt."><Button variant="secondary" icon="refresh" onClick={resource.reload}>Làm mới</Button><Button icon="download" onClick={download} disabled={busy || !rows.length}>{busy ? "Đang xuất…" : "Xuất báo cáo CSV"}</Button></PageHeader><Alert>{error}</Alert><div className="filter-bar"><SelectField label="Kỳ lương" value={periodId} onChange={(e) => setPeriodId(e.target.value)} options={(periods.data || []).map((row) => ({ value: row.periodId, label: periodLabel(row) }))} placeholder="Tất cả các kỳ" /></div><div className="stats-grid stats-three"><StatCard label="Tổng thu nhập" value={money(total("grossAmount"))} icon="payroll" /><StatCard label="Tổng thực lĩnh" value={money(total("netAmount"))} icon="payments" tone="teal" /><StatCard label="Tổng chi phí doanh nghiệp" value={money(total("companyCost"))} icon="building" tone="violet" /></div><Card title="Chi phí theo phòng ban" description="Phòng ban được ghi nhận tại thời điểm tính lương để bảo toàn lịch sử."><ResourceState resource={resource}><DataTable rows={rows} columns={[{ key: "periodStart", label: "Kỳ lương" }, { key: "departmentName", label: "Phòng ban" }, { key: "employeeCount", label: "Nhân viên", align: "right" }, { key: "grossAmount", label: "Thu nhập", align: "right" }, { key: "employeeInsurance", label: "BH nhân viên", align: "right" }, { key: "pitAmount", label: "Thuế TNCN", align: "right" }, { key: "netAmount", label: "Thực lĩnh", align: "right" }, { key: "employerInsurance", label: "BH công ty", align: "right" }, { key: "companyCost", label: "Chi phí công ty", align: "right" }]} emptyTitle="Chưa có báo cáo cho kỳ này" emptyDescription="Báo cáo được cập nhật sau khi bảng lương được phê duyệt." /></ResourceState></Card></>;
 }
-
-export default ReportsPage;
