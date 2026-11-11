@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PasswordHashTool")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e541d203f5a17e84f12fb2a991bce395d587b022")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d1794f52201220f57b1009823c3596737ef1766a")]
 [assembly: System.Reflection.AssemblyProductAttribute("PasswordHashTool")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PasswordHashTool")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

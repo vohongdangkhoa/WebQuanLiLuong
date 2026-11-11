@@ -3,9 +3,61 @@ import useAuth from "../hooks/useAuth";
 import useResource from "../hooks/useResource";
 import { money, numberText, dateTimeText, hasRole } from "../utils/format";
 import { Button, Card, EmptyState, Icon, PageHeader, ResourceState, StatCard } from "../components/ui";
+
+const shortcuts = [
+  { to: "/employees", label: "Nhân viên", text: "Hồ sơ và lịch sử phân công", icon: "employees", roles: ["HR"] },
+  { to: "/attendance", label: "Chấm công", text: "Xem ngày công và ca làm việc", icon: "attendance" },
+  { to: "/requests", label: "Đơn từ", text: "Nghỉ phép, tăng ca và sửa công", icon: "requests" },
+  { to: "/payroll", label: "Bảng lương", text: "Tính lương và gửi duyệt", icon: "payroll", roles: ["PAYROLL", "DIRECTOR"] },
+  { to: "/payslips", label: "Phiếu lương", text: "Các khoản thu nhập và khấu trừ", icon: "payslips", roles: ["EMPLOYEE"] },
+  { to: "/reports", label: "Báo cáo", text: "Chi phí lương theo kỳ và phòng ban", icon: "reports", roles: ["PAYROLL", "DIRECTOR"] },
+];
+
 export default function DashboardPage() {
-  const { user } = useAuth(); const resource = useResource("/dashboard"); const stats = resource.data || {};
+  const { user } = useAuth();
+  const resource = useResource("/dashboard");
+  const stats = resource.data;
   const management = hasRole(user, "HR", "PAYROLL", "DIRECTOR");
-  const shortcuts = [{ to: "/employees", label: "Hồ sơ nhân viên", text: "Thông tin, phòng ban và lịch sử phân công", icon: "employees", roles: ["HR"] }, { to: "/attendance", label: "Bảng chấm công", text: "Theo dõi và xác nhận công làm việc", icon: "attendance" }, { to: "/requests", label: "Yêu cầu & phê duyệt", text: "Đơn nghỉ phép, tăng ca và điều chỉnh", icon: "requests" }, { to: "/payroll", label: "Bảng lương", text: "Tính nháp, kiểm tra và gửi phê duyệt", icon: "payroll", roles: ["PAYROLL", "DIRECTOR"] }, { to: "/payslips", label: "Phiếu lương của tôi", text: "Chi tiết thu nhập và tình trạng thanh toán", icon: "payslips", roles: ["EMPLOYEE"] }, { to: "/reports", label: "Báo cáo tổng hợp", text: "Chi phí nhân sự theo từng kỳ lương", icon: "reports", roles: ["PAYROLL", "DIRECTOR"] }].filter((item) => !item.roles || hasRole(user, ...item.roles));
-  return <><PageHeader eyebrow="KHÔNG GIAN LÀM VIỆC" title={`Xin chào, ${user?.username?.split(".")[0] || "bạn"} 👋`} description="Những thông tin bạn cần để bắt đầu ngày làm việc."><Button variant="secondary" icon="refresh" onClick={resource.reload}>Làm mới</Button></PageHeader><ResourceState resource={resource}><div className="stats-grid"><StatCard label={management ? "Tổng nhân viên" : "Hồ sơ của bạn"} value={numberText(stats.employeeCount)} detail={management ? `${numberText(stats.activeEmployeeCount)} nhân viên đang làm việc` : "Thông tin được quản lý tập trung"} icon="employees" /><StatCard label="Kỳ lương đang mở" value={numberText(stats.openPeriodCount)} detail={stats.latestPeriodName || "Theo kỳ tháng dương lịch"} icon="attendance" tone="teal" /><StatCard label="Yêu cầu chờ xử lý" value={numberText(stats.pendingRequestCount)} detail="Nghỉ phép, tăng ca và điều chỉnh" icon="requests" tone="amber" /><StatCard label={management ? "Thực lĩnh kỳ gần nhất" : "Thực lĩnh gần nhất"} value={money(stats.latestPayrollNet)} detail="Theo phiên bản lương đã phê duyệt" icon="payroll" tone="violet" /></div></ResourceState><div className="dashboard-banner"><div><span className="eyebrow">QUY TRÌNH TIỀN LƯƠNG</span><h2>Từ dữ liệu chính xác đến thanh toán minh bạch.</h2><p>Mỗi bước có trạng thái rõ ràng. Mọi thay đổi đều được lưu lại.</p></div><div className="workflow-track">{["Hồ sơ", "Chấm công", "Tính lương", "Phê duyệt", "Thanh toán"].map((step, index) => <div key={step}><span>{index + 1}</span><small>{step}</small></div>)}</div></div><Card title="Truy cập nhanh" description="Các công việc phù hợp với vai trò của bạn."><div className="quick-links">{shortcuts.map((item) => <Link key={item.to} to={item.to}><span className="quick-icon"><Icon name={item.icon} size={24} /></span><div><h3>{item.label}</h3><p>{item.text}</p></div><Icon name="arrow" size={18} /></Link>)}</div></Card><Card title="Hoạt động gần đây" description="Các thay đổi và thao tác mới nhất trong hệ thống.">{stats.recentActivity?.length ? <ul className="activity-list">{stats.recentActivity.map((item, index) => <li key={`${item.occurredAt}-${index}`}><span className="activity-dot" /><div><strong>{item.title}</strong><p>{item.detail}</p></div><time>{dateTimeText(item.occurredAt)}</time></li>)}</ul> : <EmptyState title="Chưa có hoạt động mới" description="Lịch sử thao tác sẽ được cập nhật tại đây." />}</Card></>;
+  const visibleShortcuts = shortcuts.filter((item) => !item.roles || hasRole(user, ...item.roles));
+
+  return (
+    <>
+      <PageHeader title="Tổng quan">
+        <Button variant="secondary" icon="refresh" onClick={resource.reload}>Làm mới</Button>
+      </PageHeader>
+      <ResourceState resource={resource}>
+        {stats && <div className="stats-grid">
+          <StatCard label={management ? "Tổng nhân viên" : "Hồ sơ của bạn"} value={numberText(stats.employeeCount)}
+            detail={management ? numberText(stats.activeEmployeeCount) + " người đang làm việc" : undefined} icon="employees" />
+          <StatCard label="Kỳ lương đang mở" value={numberText(stats.openPeriodCount)} detail={stats.latestPeriodName} icon="attendance" tone="teal" />
+          <StatCard label="Yêu cầu chờ xử lý" value={numberText(stats.pendingRequestCount)} icon="requests" tone="amber" />
+          <StatCard label="Thực lĩnh kỳ gần nhất" value={money(stats.latestPayrollNet)} icon="payroll" tone="violet" />
+        </div>}
+      </ResourceState>
+      <Card title="Truy cập nhanh">
+        <div className="quick-links">
+          {visibleShortcuts.map((item) => (
+            <Link key={item.to} to={item.to}>
+              <span className="quick-icon"><Icon name={item.icon} size={24} /></span>
+              <div><h3>{item.label}</h3><p>{item.text}</p></div>
+              <Icon name="arrow" size={18} />
+            </Link>
+          ))}
+        </div>
+      </Card>
+      {stats && <Card title="Thông báo">
+        {stats.recentActivity?.length ? (
+          <ul className="activity-list">
+            {stats.recentActivity.map((item, index) => (
+              <li key={item.occurredAt + "-" + index}>
+                <span className="activity-dot" />
+                <div><strong>{item.title}</strong><p>{item.detail}</p></div>
+                <time>{dateTimeText(item.occurredAt)}</time>
+              </li>
+            ))}
+          </ul>
+        ) : <EmptyState title="Chưa có thông báo" />}
+      </Card>}
+    </>
+  );
 }

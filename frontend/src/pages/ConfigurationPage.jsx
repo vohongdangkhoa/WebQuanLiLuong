@@ -3,7 +3,7 @@ import useAuth from "../hooks/useAuth";
 import useResource from "../hooks/useResource";
 import useOperation from "../hooks/useOperation";
 import { apiGet, apiPost, apiUpload, queryString, saveDownload } from "../services/api";
-import { hasRole, periodLabel, today } from "../utils/format";
+import { displayValue, hasRole, money, percentText, periodLabel, today } from "../utils/format";
 import { Alert, Button, Card, DataTable, Field, Modal, PageHeader, ResourceState, SelectField, Tabs } from "../components/ui";
 import ActionForm from "../components/ActionForm";
 
@@ -94,8 +94,17 @@ function PolicyDetail({ row, onClose }) {
     roundScale: "Số chữ số làm tròn", sourceNote: "Căn cứ / ghi chú", status: "Trạng thái",
   };
   return <Modal title={`Chính sách ${row.policyCode}`} onClose={onClose} wide>
-    <DataTable searchable={false} rows={Object.entries(labels).map(([key, label]) => ({ label, value: row[key] ?? "—" }))} columns={[{ key: "label", label: "Thông số" }, { key: "value", label: "Giá trị" }]} />
-    <h3>Bậc thuế theo phiên bản</h3><ResourceState resource={brackets}><DataTable searchable={false} rows={brackets.data || []} columns={[{ key: "lowerBound", label: "Cận dưới" }, { key: "upperBound", label: "Cận trên", render: (v) => v === null ? "Không giới hạn" : v }, { key: "rate", label: "Tỷ lệ" }]} /></ResourceState>
+    <DataTable searchable={false}
+      rows={Object.entries(labels).map(([key, label]) => ({ label, value: displayValue(key, row[key]) }))}
+      columns={[{ key: "label", label: "Thông số" }, { key: "value", label: "Giá trị" }]} />
+    <h3>Bậc thuế</h3>
+    <ResourceState resource={brackets}>
+      <DataTable searchable={false} rows={brackets.data || []} columns={[
+        { key: "lowerBound", label: "Cận dưới", align: "right", render: money },
+        { key: "upperBound", label: "Cận trên", align: "right", render: (value) => value == null ? "Không giới hạn" : money(value) },
+        { key: "rate", label: "Thuế suất", align: "right", render: percentText },
+      ]} />
+    </ResourceState>
   </Modal>;
 }
 
@@ -257,7 +266,7 @@ export default function ConfigurationPage() {
   const create = tab === "policies" ? () => setPolicyOpen(true) : tab === "allowances" ? createAllowance : tab === "entries" ? createEntry : tab === "deduction-accounts" ? createAccount : () => setDependentOpen(true);
   const columns = tab === "policies" ? policyColumns : tab === "allowances" ? allowanceColumns : tab === "entries" ? entryColumns : tab === "dependents" ? dependentColumns : accountColumns;
   return <>
-    <PageHeader eyebrow={manager ? "CHÍNH SÁCH VÀ PHÚC LỢI" : "HỒ SƠ CÁ NHÂN"} title={manager ? "Thiết lập lương" : "Người phụ thuộc"} description="Quản lý phiên bản có hiệu lực, hồ sơ chờ duyệt và minh chứng theo đúng phân quyền.">
+    <PageHeader title={manager ? "Thiết lập lương" : "Người phụ thuộc"} description="Xem chính sách lương, phụ cấp và hồ sơ người phụ thuộc.">
       <Button variant="secondary" icon="refresh" onClick={refresh}>Làm mới</Button>{canCreate && <Button icon="plus" onClick={create} disabled={!catalogs.data}>Tạo hồ sơ</Button>}
     </PageHeader>
     {operation.notice}<Alert type="success" onClose={() => setMessage("")}>{message}</Alert><Alert>{downloadError}</Alert>

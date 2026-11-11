@@ -1,56 +1,57 @@
 using Microsoft.AspNetCore.Mvc;
-using Payroll.Api.Data;
 using Oracle.ManagedDataAccess.Client;
+using Payroll.Api.Data;
+using System.Globalization;
+
 namespace Payroll.Api.Controllers;
+
 [ApiController]
 [Route("api/health")]
-public class HealthController : ControllerBase
+public class HealthController(OracleConnectionFactory connectionFactory, ILogger<HealthController> logger) : ControllerBase
 {
-    private readonly OracleConnectionFactory _connectionFactory;
-
-public HealthController(OracleConnectionFactory connectionFactory)
-{
-    _connectionFactory = connectionFactory;
-}
     [HttpGet]
-    public IActionResult Get()
-    {
-        return Ok(new { status = "ok", application = "HRFlow" });
-    }
+    public IActionResult Get() => Ok(new { status = "ok", application = "HRFlow" });
+
     [HttpGet("database")]
-public async Task<IActionResult> GetDatabase(CancellationToken cancellationToken)
-{
-    try
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> GetDatabase(CancellationToken cancellationToken)
     {
-        using var connection = _connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
-
-        using var command = connection.CreateCommand();
-        command.CommandText = "SELECT 1 FROM dual";
-
-        await command.ExecuteScalarAsync(cancellationToken);
-
-        return Ok(new
+        try
         {
-            status = "ok",
-            database = "connected"
-        });
-    }
-    catch (OracleException)
-    {
-        return StatusCode(503, new
+            using var connection = connectionFactory.CreateConnection();
+            await connection.OpenAsync(cancellationToken);
+
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT COUNT(*)
+                FROM all_objects
+                WHERE owner = 'PAYROLL_APP' AND object_type = 'PACKAGE' AND status = 'VALID'
+                  AND object_name IN (
+                    'PKG_AUTH', 'PKG_HR_READ', 'PKG_HR_WRITE', 'PKG_HR_CORE', 'PKG_HR_PORTAL', 'PKG_PLATFORM',
+                    'PKG_FINANCE_PORTAL', 'PKG_CONFIGURATION', 'PKG_PAYROLL_CORE', 'PKG_PAYROLL_READ',
+                    'PKG_REQUESTS', 'PKG_PAYMENT')
+                """;
+            const int requiredPackages = 12;
+            var available = Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
+            if (available != requiredPackages)
+            {
+                logger.LogWarning("Oracle readiness check found {Available} of {Required} packages", available, requiredPackages);
+                return StatusCode(503, new
+                {
+                    status = "error",
+                    message = "Oracle đã kết nối nhưng thiếu package nghiệp vụ hoặc quyền thực thi."
+                });
+            }
+            return Ok(new { status = "ok", database = "connected", packages = "available" });
+        }
+        catch (OracleException error)
         {
-            status = "error",
-            message = "Không kết nối được Oracle."
-        });
-    }
-    catch (InvalidOperationException)
-    {
-        return StatusCode(503, new
+            logger.LogWarning("Oracle readiness check failed with code {Code}", error.Number);
+            return StatusCode(503, new { status = "error", message = "Không kiểm tra được kết nối Oracle." });
+        }
+        catch (InvalidOperationException)
         {
-            status = "error",
-            message = "Kiểm tra lại cấu hình kết nối Oracle."
-        });
+            return StatusCode(503, new { status = "error", message = "Kiểm tra lại cấu hình kết nối Oracle." });
+        }
     }
-}
 }

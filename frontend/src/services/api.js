@@ -315,7 +315,11 @@ export async function createEmployeeAssignment(employeeId, assignment) {
 
 export class ApiError extends Error {
   constructor(message, status, details) {
-    super(message); this.name = "ApiError"; this.status = status; this.details = details;
+    const reference = status >= 500 && typeof details?.traceId === "string" ? details.traceId : "";
+    super(reference ? message + " Mã lỗi: " + reference : message);
+    this.name = "ApiError";
+    this.status = status;
+    this.details = details;
   }
 }
 export async function apiRequest(path, { method = "GET", body, signal, download = false } = {}) {
@@ -369,6 +373,6 @@ export async function apiUpload(path, file) {
   catch { throw new ApiError("Không thể tải tệp lên. Vui lòng kiểm tra kết nối.", 0); }
   const data = await response.json().catch(() => ({}));
   if (response.status === 401) window.dispatchEvent(new Event("payroll:session-expired"));
-  if (!response.ok) throw new ApiError(data.message || Object.values(data.errors || {}).flat()[0] || data.title || "Không nhập được tệp.", response.status);
+  if (!response.ok) throw new ApiError(data.message || Object.values(data.errors || {}).flat()[0] || data.title || "Không nhập được tệp.", response.status, data);
   return data;
 }
