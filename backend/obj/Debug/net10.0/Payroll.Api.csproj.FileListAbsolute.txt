@@ -48,4 +48,9 @@ D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\sn
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\ztffki7eie-{0}-tv8bevkh5j-tv8bevkh5j.gz
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\2fjhodutnv-{0}-g3h7a9wx5y-g3h7a9wx5y.gz
 D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\hgizwvzkux-{0}-ne2k2l8qiv-ne2k2l8qiv.gz
-D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\uhfkcn1xl6-{0}-hyoejgktxl-hyoejgktxl.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\5wuzyknxla-{0}-i63s3tr4th-i63s3tr4th.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\idwv4cw8t4-{0}-7iptq2tlh1-7iptq2tlh1.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\mf6dov35ok-{0}-gekdjvdn5c-gekdjvdn5c.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\ynjcxgmhf6-{0}-ik2t59m1oh-ik2t59m1oh.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\cu4guvc6kk-{0}-qvb4bhcias-qvb4bhcias.gz
+D:\Hk1 năm 3\LT_CHQTCSDL\WebQuanLiLuong\backend\obj\Debug\net10.0\compressed\uhfkcn1xl6-{0}-drqcr7k8kj-drqcr7k8kj.gz
