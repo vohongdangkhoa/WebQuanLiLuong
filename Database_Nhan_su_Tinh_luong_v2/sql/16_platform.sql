@@ -27,11 +27,23 @@ CREATE OR REPLACE PACKAGE BODY PKG_PLATFORM AS
     WHERE ur.user_id=p_actor AND INSTR(','||p_roles||',',','||r.role_code||',')>0;
     RETURN v_n>0;
   END;
-  PROCEDURE dashboard(p_actor NUMBER,p_rows OUT SYS_REFCURSOR) IS v_own NUMBER;v_manager NUMBER:=0;v_finance NUMBER:=0;
+  PROCEDURE dashboard(p_actor NUMBER,p_rows OUT SYS_REFCURSOR) IS
+    v_own NUMBER; v_manager NUMBER:=0; v_finance NUMBER:=0;
+    v_latest_run NUMBER; v_latest_period VARCHAR2(7);
   BEGIN
     v_own:=own_employee(p_actor);
     IF has_role(p_actor,'HR,PAYROLL,DIRECTOR') THEN v_manager:=1; END IF;
     IF has_role(p_actor,'PAYROLL,DIRECTOR') THEN v_finance:=1; END IF;
+    BEGIN
+      SELECT u.run_id, TO_CHAR(p.period_start,'MM/YYYY') INTO v_latest_run, v_latest_period
+      FROM PAYROLL_RUN u JOIN PAYROLL_PERIOD p ON p.period_id=u.period_id
+      WHERE u.status='APPROVED' AND EXISTS (
+        SELECT 1 FROM PAYROLL_RESULT r WHERE r.run_id=u.run_id
+          AND (v_finance=1 OR (v_manager=0 AND r.employee_id=v_own)))
+      ORDER BY p.period_start DESC, u.run_id DESC FETCH FIRST 1 ROW ONLY;
+    EXCEPTION WHEN NO_DATA_FOUND THEN
+      v_latest_run:=NULL; v_latest_period:=NULL;
+    END;
     OPEN p_rows FOR SELECT
       (SELECT COUNT(*) FROM EMPLOYEE WHERE v_manager=1 OR employee_id=v_own) employee_count,
       (SELECT COUNT(*) FROM EMPLOYEE WHERE status='ACTIVE' AND (v_manager=1 OR employee_id=v_own)) active_employee_count,
@@ -39,10 +51,9 @@ CREATE OR REPLACE PACKAGE BODY PKG_PLATFORM AS
       ((SELECT COUNT(*) FROM LEAVE_REQUEST WHERE status='PENDING' AND (v_manager=1 OR employee_id=v_own))+
        (SELECT COUNT(*) FROM OVERTIME_REQUEST WHERE status='PENDING' AND (v_manager=1 OR employee_id=v_own))) pending_request_count,
       (SELECT SUM(r.net_amount) FROM PAYROLL_RESULT r JOIN PAYROLL_RUN u ON u.run_id=r.run_id
-       WHERE u.run_id=(SELECT MAX(run_id) FROM PAYROLL_RUN WHERE status='APPROVED')
+       WHERE u.run_id=v_latest_run
        AND (v_finance=1 OR (v_manager=0 AND r.employee_id=v_own))) latest_payroll_net,
-      (SELECT TO_CHAR(MAX(p.period_start),'MM/YYYY') FROM PAYROLL_PERIOD p JOIN PAYROLL_RUN u ON u.period_id=p.period_id
-       WHERE u.status='APPROVED' AND (v_finance=1 OR v_manager=0)) latest_period_name
+      v_latest_period latest_period_name
     FROM dual;
   END;
   PROCEDURE notifications(p_actor NUMBER,p_rows OUT SYS_REFCURSOR) IS v_id NUMBER;

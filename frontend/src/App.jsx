@@ -3,6 +3,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import MyProfilePage from "./pages/MyProfilePage";
 import EmployeesPage from "./pages/EmployeesPage";
 import ContractsPage from "./pages/ContractsPage";
 import AttendancePage from "./pages/AttendancePage";
@@ -33,7 +34,10 @@ export default function App() {
           <Route path="reports" element={<ReportsPage />} />
           <Route path="payments" element={<PaymentsPage />} />
         </Route>
-        <Route element={<ProtectedRoute roles={["EMPLOYEE"]} />}><Route path="payslips" element={<PayslipsPage />} /></Route>
+        <Route element={<ProtectedRoute roles={["EMPLOYEE"]} />}>
+          <Route path="profile" element={<MyProfilePage />} />
+          <Route path="payslips" element={<PayslipsPage />} />
+        </Route>
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="requests" element={<RequestsPage />} />
         <Route path="bank-accounts" element={<BankAccountsPage />} />

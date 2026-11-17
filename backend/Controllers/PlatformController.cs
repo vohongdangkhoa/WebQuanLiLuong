@@ -15,7 +15,7 @@ namespace Payroll.Api.Controllers;
 [ApiController, Authorize, Route("api")]
 [ResponseCache(NoStore=true, Location=ResponseCacheLocation.None)]
 public sealed class PlatformController(OraclePlatformRepository repository, BankSecurityService security,
-    AuthService auth, IPasswordHasher<AuthUser> hasher) : ControllerBase
+    AuthService auth, IPasswordHasher<AuthUser> hasher, OracleFinanceRepository profileReader) : ControllerBase
 {
     private long Actor() => long.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier),
         NumberStyles.None, CultureInfo.InvariantCulture, out var id) && id>0
@@ -29,6 +29,19 @@ public sealed class PlatformController(OraclePlatformRepository repository, Bank
         var data=rows.FirstOrDefault() ?? new Dictionary<string,object?>();
         data["recentActivity"]=await repository.ReadAsync("notifications",actor,ct);
         return Ok(data);
+    }
+
+    [HttpGet("profile"), Authorize(Roles = "EMPLOYEE")]
+    public async Task<IActionResult> PersonalProfile(CancellationToken ct)
+    {
+        var actor = Actor();
+        var rows = await profileReader.ReadAsync("PAYROLL_APP.PKG_PERSONAL_PROFILE.profile", actor, ct);
+        if (rows.Count == 0)
+            return NotFound(new { message = "Tài khoản chưa được liên kết với hồ sơ nhân viên. Vui lòng liên hệ bộ phận nhân sự." });
+        var profile = rows.Single();
+        profile["assignments"] = await profileReader.ReadAsync("PAYROLL_APP.PKG_PERSONAL_PROFILE.assignments", actor, ct);
+        profile["contracts"] = await profileReader.ReadAsync("PAYROLL_APP.PKG_PERSONAL_PROFILE.contracts", actor, ct);
+        return Ok(profile);
     }
 
     [HttpGet("bank-accounts")]

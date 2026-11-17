@@ -6,6 +6,7 @@ import { apiGet, apiPost, apiUpload, queryString, saveDownload } from "../servic
 import { displayValue, hasRole, money, percentText, periodLabel, today } from "../utils/format";
 import { Alert, Button, Card, DataTable, Field, Modal, PageHeader, ResourceState, SelectField, Tabs } from "../components/ui";
 import ActionForm from "../components/ActionForm";
+import { EmployeeIdentity } from "../components/EmployeeFilter";
 
 const base = "/configuration";
 const intervalFields = () => [
@@ -38,8 +39,8 @@ const accountColumns = [
   { key: "monthlyLimit", label: "Giới hạn tháng" }, { key: "description", label: "Nội dung" },
 ];
 
-function DependentForm({ employees, selectedEmployee, onClose, onSuccess }) {
-  const [values, setValues] = useState({ employeeId: selectedEmployee || (employees.length === 1 ? String(employees[0].value) : ""), identity: "", fullName: "", birthDate: "", validFrom: today(), validTo: "" });
+function DependentForm({ employees, selectedEmployee, personalEmployee, onClose, onSuccess }) {
+  const [values, setValues] = useState({ employeeId: personalEmployee ? String(personalEmployee.employeeId) : selectedEmployee || (employees.length === 1 ? String(employees[0].value) : ""), identity: "", fullName: "", birthDate: "", validFrom: today(), validTo: "" });
   const [file, setFile] = useState(null);
   const [documentId, setDocumentId] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -60,7 +61,7 @@ function DependentForm({ employees, selectedEmployee, onClose, onSuccess }) {
         setDocumentId(proof);
       }
       const result = await apiPost(`${base}/dependents`, {
-        ...values, employeeId: Number(values.employeeId), identity: values.identity.trim(), fullName: values.fullName.trim(),
+        ...values, employeeId: personalEmployee ? personalEmployee.employeeId : Number(values.employeeId), identity: values.identity.trim(), fullName: values.fullName.trim(),
         birthDate: values.birthDate || null, validTo: values.validTo || null, documentId: proof,
       });
       onSuccess(result);
@@ -71,7 +72,7 @@ function DependentForm({ employees, selectedEmployee, onClose, onSuccess }) {
     <form className="action-form" onSubmit={submit}>
       <div className="form-note">Hồ sơ cần giám đốc xác minh. Định danh được bảo vệ trên máy chủ; không hiển thị lại trong danh sách. Chỉ gửi minh chứng mà bạn có quyền sử dụng.</div>
       <fieldset disabled={busy}><div className="form-grid">
-        <SelectField label="Nhân viên *" options={employees} value={values.employeeId} onChange={(e) => change("employeeId", e.target.value)} required />
+        {personalEmployee ? <EmployeeIdentity employee={personalEmployee} /> : <SelectField label="Nhân viên *" options={employees} value={values.employeeId} onChange={(e) => change("employeeId", e.target.value)} required />}
         <Field label="Định danh người phụ thuộc *" hint="Nhập thống nhất số định danh hoặc mã hồ sơ trên minh chứng.">{(id) => <input id={id} required maxLength={128} autoComplete="off" value={values.identity} onChange={(e) => change("identity", e.target.value)} />}</Field>
         <Field label="Họ tên người phụ thuộc *">{(id) => <input id={id} required maxLength={150} value={values.fullName} onChange={(e) => change("fullName", e.target.value)} />}</Field>
         <Field label="Ngày sinh">{(id) => <input id={id} type="date" max={today()} value={values.birthDate} onChange={(e) => change("birthDate", e.target.value)} />}</Field>
@@ -266,12 +267,13 @@ export default function ConfigurationPage() {
   const create = tab === "policies" ? () => setPolicyOpen(true) : tab === "allowances" ? createAllowance : tab === "entries" ? createEntry : tab === "deduction-accounts" ? createAccount : () => setDependentOpen(true);
   const columns = tab === "policies" ? policyColumns : tab === "allowances" ? allowanceColumns : tab === "entries" ? entryColumns : tab === "dependents" ? dependentColumns : accountColumns;
   return <>
-    <PageHeader title={manager ? "Thiết lập lương" : "Người phụ thuộc"} description="Xem chính sách lương, phụ cấp và hồ sơ người phụ thuộc.">
-      <Button variant="secondary" icon="refresh" onClick={refresh}>Làm mới</Button>{canCreate && <Button icon="plus" onClick={create} disabled={!catalogs.data}>Tạo hồ sơ</Button>}
+    <PageHeader title={manager ? "Thiết lập lương" : "Người phụ thuộc"} description={manager ? "Xem chính sách lương, phụ cấp và hồ sơ người phụ thuộc." : "Đăng ký và theo dõi hồ sơ người phụ thuộc của bạn."}>
+      <Button variant="secondary" icon="refresh" onClick={refresh}>Làm mới</Button>{canCreate && <Button icon="plus" onClick={create} disabled={!catalogs.data || (!manager && employees.length !== 1)}>Tạo hồ sơ</Button>}
     </PageHeader>
     {operation.notice}<Alert type="success" onClose={() => setMessage("")}>{message}</Alert><Alert>{downloadError}</Alert>
     <Tabs tabs={tabs} value={tab} onChange={(value) => { setTab(value); setDownloadError(""); }} />
     <ResourceState resource={catalogs}><div className="filter-bar">
+      {!manager && catalogs.data?.employees?.length === 1 && <EmployeeIdentity employee={catalogs.data.employees[0]} />}
       {manager && ["allowances", "entries", "dependents"].includes(tab) && <SelectField label="Nhân viên" options={employees} value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} placeholder="Tất cả nhân viên" />}
       {tab === "entries" && <SelectField label="Kỳ lương" options={periods} value={periodId} onChange={(e) => setPeriodId(e.target.value)} placeholder="Tất cả kỳ" />}
     </div></ResourceState>
@@ -289,7 +291,7 @@ export default function ConfigurationPage() {
       setMessage(result?.message || "Đã tạo phiên bản chính sách chờ duyệt.");
       refresh();
     }} />}
-    {dependentOpen && <DependentForm employees={employees} selectedEmployee={employeeId} onClose={() => setDependentOpen(false)} onSuccess={(result) => { setDependentOpen(false); setMessage(result.message); refresh(); }} />}
+    {dependentOpen && <DependentForm personalEmployee={manager ? undefined : catalogs.data?.employees?.[0]} employees={employees} selectedEmployee={employeeId} onClose={() => setDependentOpen(false)} onSuccess={(result) => { setDependentOpen(false); setMessage(result.message); refresh(); }} />}
     {policyDetail && <PolicyDetail row={policyDetail} onClose={() => setPolicyDetail(null)} />}
   </>;
 }

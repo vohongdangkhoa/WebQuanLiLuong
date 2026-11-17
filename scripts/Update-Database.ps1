@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 if ($Container -notmatch '^[A-Za-z0-9_.-]+$' -or $Pdb -notmatch '^[A-Za-z0-9_]+$') { throw 'Invalid database target' }
 $projectRoot=Split-Path $PSScriptRoot -Parent
 $sqlRoot=Join-Path $projectRoot 'Database_Nhan_su_Tinh_luong_v2\sql'
-$upgradeFiles=@('16_platform.sql','17_hr_portal.sql','18_finance_portal.sql','19_configuration.sql','20_payroll_withdraw.sql')
+$upgradeFiles=@('16_platform.sql','17_hr_portal.sql','18_finance_portal.sql','19_configuration.sql','20_payroll_withdraw.sql','21_employee_accounts.sql','22_personal_profile.sql')
 & docker exec $Container mkdir -p /tmp/payroll_upgrade
 if($LASTEXITCODE -ne 0){throw 'Oracle container is not running.'}
 foreach($file in $upgradeFiles){
@@ -18,10 +18,10 @@ $commands=@(
  'alter session set current_schema=PAYROLL_APP;'
 )
 foreach($file in $upgradeFiles){$commands+="@/tmp/payroll_upgrade/$file"}
-$objects="'PKG_PLATFORM','PKG_HR_PORTAL','PKG_FINANCE_PORTAL','PKG_CONFIGURATION','TG_RUN_TRANSITION'"
+$objects="'PKG_PLATFORM','PKG_HR_PORTAL','PKG_FINANCE_PORTAL','PKG_CONFIGURATION','TG_RUN_TRANSITION','PKG_EMPLOYEE_ACCOUNTS','PKG_PERSONAL_PROFILE'"
 $commands+=@(
  "select name,type,line,position,text from all_errors where owner='PAYROLL_APP' and attribute='ERROR' and name in ($objects) order by name,type,sequence;",
- "declare n number; begin select count(*) into n from all_objects where owner='PAYROLL_APP' and object_name in ($objects) and status='VALID'; if n<>9 then raise_application_error(-20999,'Upgrade contains missing or invalid objects. Review compilation errors above.'); end if; end;",
+ "declare n number; begin select count(*) into n from all_objects where owner='PAYROLL_APP' and object_name in ($objects) and status='VALID'; if n<>13 then raise_application_error(-20999,'Upgrade contains missing or invalid objects. Review compilation errors above.'); end if; end;",
  '/',
  "select object_name,object_type,status from all_objects where owner='PAYROLL_APP' and object_name in ($objects) order by object_name,object_type;",
  'exit success'

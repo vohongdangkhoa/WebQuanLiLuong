@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import useAuth from "../hooks/useAuth";
 import { hasRole, roleLabels } from "../utils/format";
 import { Alert, Icon } from "./ui";
-const titles = { "/": "Tổng quan", "/employees": "Nhân viên", "/contracts": "Hợp đồng", "/attendance": "Chấm công", "/requests": "Đơn từ", "/payroll": "Bảng lương", "/payments": "Thanh toán", "/payslips": "Phiếu lương", "/reports": "Báo cáo", "/bank-accounts": "Tài khoản nhận lương", "/audit": "Nhật ký", "/settings": "Tài khoản", "/configuration": "Thiết lập lương" };
+const titles = { "/": "Tổng quan", "/profile": "Hồ sơ cá nhân", "/employees": "Nhân viên", "/contracts": "Hợp đồng", "/attendance": "Chấm công", "/requests": "Đơn từ", "/payroll": "Bảng lương", "/payments": "Thanh toán", "/payslips": "Phiếu lương", "/reports": "Báo cáo", "/bank-accounts": "Tài khoản nhận lương", "/audit": "Nhật ký", "/settings": "Tài khoản", "/configuration": "Thiết lập lương" };
 export default function Header({ onMenu }) {
   const { user, signOut } = useAuth(); const location = useLocation(); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
   const title = location.pathname === "/configuration" && !hasRole(user, "HR", "PAYROLL", "DIRECTOR")

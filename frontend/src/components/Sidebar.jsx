@@ -4,6 +4,7 @@ import { hasRole } from "../utils/format";
 import { Icon } from "./ui";
 const items = [
   { to: "/", label: "Tổng quan", icon: "dashboard" },
+  { to: "/profile", label: "Hồ sơ cá nhân", icon: "employees", roles: ["EMPLOYEE"] },
   { to: "/employees", label: "Nhân viên", icon: "employees", roles: ["HR"] },
   { to: "/contracts", label: "Hợp đồng", icon: "requests", roles: ["HR", "PAYROLL", "DIRECTOR"] },
   { to: "/attendance", label: "Chấm công", icon: "attendance" },
