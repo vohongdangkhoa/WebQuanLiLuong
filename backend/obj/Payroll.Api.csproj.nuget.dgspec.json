@@ -35,7 +35,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "false",
+          "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "all"
         },
@@ -53,6 +53,10 @@
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",
               "version": "[23.26.301, )"
+            },
+            "System.Security.Cryptography.Pkcs": {
+              "target": "Package",
+              "version": "[10.0.15, )"
             }
           },
           "imports": [

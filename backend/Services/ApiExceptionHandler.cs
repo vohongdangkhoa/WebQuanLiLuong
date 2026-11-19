@@ -7,6 +7,24 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception error, CancellationToken token)
     {
+        if (error is OracleException { Number: 1013 } or
+            OperationCanceledException { InnerException: OracleException { Number: 1013 } })
+        {
+            if (context.RequestAborted.IsCancellationRequested)
+            {
+                context.Response.StatusCode = StatusCodes.Status499ClientClosedRequest;
+                return true;
+            }
+
+            var endpoint = context.GetEndpoint() ?? context.Features.Get<IExceptionHandlerFeature>()?.Endpoint;
+            var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText;
+            logger.LogWarning("Oracle canceled {Method} {Route} (ORA-01013) {TraceId}",
+                context.Request.Method, route, context.TraceIdentifier);
+            await WriteErrorAsync(context, StatusCodes.Status503ServiceUnavailable,
+                "Truy vấn dữ liệu bị gián đoạn. Vui lòng thử lại.", token);
+            return true;
+        }
+
         var (status, message) = error switch
         {
             PlatformException e => (e.StatusCode, e.Message),
@@ -32,10 +50,15 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
             logger.LogError(error, "Request failed {Method} {Route} {TraceId}", context.Request.Method, route, context.TraceIdentifier);
         }
         else logger.LogWarning("Request rejected {Status} {TraceId}", status, context.TraceIdentifier);
+        await WriteErrorAsync(context, status, message, token);
+        return true;
+    }
+
+    private static Task WriteErrorAsync(HttpContext context, int status, string message, CancellationToken token)
+    {
         context.Response.StatusCode = status;
         context.Response.Headers.CacheControl = "no-store";
-        await context.Response.WriteAsJsonAsync(new { message, traceId = context.TraceIdentifier }, token);
-        return true;
+        return context.Response.WriteAsJsonAsync(new { message, traceId = context.TraceIdentifier }, token);
     }
 }
 

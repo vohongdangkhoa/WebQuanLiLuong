@@ -29,9 +29,9 @@ public class HealthController(OracleConnectionFactory connectionFactory, ILogger
                   AND object_name IN (
                     'PKG_AUTH', 'PKG_HR_READ', 'PKG_HR_WRITE', 'PKG_HR_CORE', 'PKG_HR_PORTAL', 'PKG_PLATFORM',
                     'PKG_FINANCE_PORTAL', 'PKG_CONFIGURATION', 'PKG_PAYROLL_CORE', 'PKG_PAYROLL_READ',
-                    'PKG_REQUESTS', 'PKG_PAYMENT', 'PKG_EMPLOYEE_ACCOUNTS', 'PKG_PERSONAL_PROFILE')
+                    'PKG_REQUESTS', 'PKG_PAYMENT', 'PKG_EMPLOYEE_ACCOUNTS', 'PKG_PERSONAL_PROFILE', 'PKG_LEAVE_PLANNING')
                 """;
-            const int requiredPackages = 14;
+            const int requiredPackages = 15;
             var available = Convert.ToInt32(await command.ExecuteScalarAsync(cancellationToken), CultureInfo.InvariantCulture);
             if (available != requiredPackages)
             {

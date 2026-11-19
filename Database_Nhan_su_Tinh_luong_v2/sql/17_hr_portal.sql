@@ -97,6 +97,9 @@ CREATE OR REPLACE PACKAGE BODY PKG_HR_PORTAL AS
     ELSIF p_resource='leaves' THEN
       OPEN p_rows FOR SELECT l.leave_id,l.employee_id,e.employee_code,e.full_name,l.leave_type_id,lt.leave_name,
         TO_CHAR(l.starts_at,'YYYY-MM-DD"T"HH24:MI:SS') starts_at,TO_CHAR(l.ends_at,'YYYY-MM-DD"T"HH24:MI:SS') ends_at,
+        TO_CHAR(CASE WHEN CAST(l.ends_at AS DATE)=TRUNC(CAST(l.ends_at AS DATE))
+          THEN CAST(l.ends_at AS DATE)-1 ELSE CAST(l.ends_at AS DATE) END,'YYYY-MM-DD') last_date,
+        (SELECT SUM(d.minutes) FROM LEAVE_DAY d WHERE d.leave_id=l.leave_id) requested_minutes,
         l.reason,l.status,l.requested_by,l.decision_reason FROM LEAVE_REQUEST l JOIN EMPLOYEE e ON e.employee_id=l.employee_id
         JOIN LEAVE_TYPE lt ON lt.leave_type_id=l.leave_type_id
         WHERE (v_hr_view=1 OR l.employee_id=v_employee) AND (p_employee IS NULL OR l.employee_id=p_employee)

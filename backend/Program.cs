@@ -36,6 +36,7 @@ builder.Services.AddScoped<OracleJobPositionRepository>();
 builder.Services.AddScoped<OraclePlatformRepository>();
 builder.Services.AddScoped<OracleFinanceRepository>();
 builder.Services.AddScoped<OracleHrRepository>();
+builder.Services.AddScoped<OracleLeavePlanningRepository>();
 builder.Services.AddScoped<OracleConfigurationRepository>();
 builder.Services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
 builder.Services.AddScoped<AuthService>();

@@ -23,6 +23,7 @@ WHENEVER SQLERROR EXIT SQL.SQLCODE ROLLBACK;
 @@20_payroll_withdraw.sql
 @@21_employee_accounts.sql
 @@22_personal_profile.sql
+@@23_leave_planning.sql
 
 DECLARE
   v_n NUMBER;

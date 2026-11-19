@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "A9RIQikYHvM=",
+  "dgSpecHash": "+18o53Tjqt0=",
   "success": true,
   "projectFilePath": "D:\\Hk1 năm 3\\LT_CHQTCSDL\\WebQuanLiLuong\\backend\\Payroll.Api.csproj",
   "expectedPackageFiles": [
@@ -10,7 +10,7 @@
     "C:\\Users\\vohon\\.nuget\\packages\\system.configuration.configurationmanager\\8.0.0\\system.configuration.configurationmanager.8.0.0.nupkg.sha512",
     "C:\\Users\\vohon\\.nuget\\packages\\system.diagnostics.performancecounter\\8.0.0\\system.diagnostics.performancecounter.8.0.0.nupkg.sha512",
     "C:\\Users\\vohon\\.nuget\\packages\\system.directoryservices.protocols\\8.0.2\\system.directoryservices.protocols.8.0.2.nupkg.sha512",
-    "C:\\Users\\vohon\\.nuget\\packages\\system.security.cryptography.pkcs\\8.0.1\\system.security.cryptography.pkcs.8.0.1.nupkg.sha512",
+    "C:\\Users\\vohon\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.15\\system.security.cryptography.pkcs.10.0.15.nupkg.sha512",
     "C:\\Users\\vohon\\.nuget\\packages\\system.security.cryptography.protecteddata\\8.0.0\\system.security.cryptography.protecteddata.8.0.0.nupkg.sha512"
   ],
   "logs": []

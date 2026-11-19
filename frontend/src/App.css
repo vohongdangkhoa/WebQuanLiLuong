@@ -422,3 +422,15 @@ th.text-right, td.text-right { text-align: right; }
   .overview-card-icon { margin-bottom: 12px; }
   .overview-card p { margin-bottom: 18px; }
 }
+
+.leave-plan { margin-top: 22px; }
+.leave-plan .section-toolbar { align-items: center; gap: 12px; }
+.leave-plan h3 { margin: 0; font-size: 16px; }
+.leave-plan-total {
+  padding: 14px 16px;
+  color: #166534;
+  background: #ecfdf3;
+  border: 1px solid #c9e3d2;
+  border-radius: 8px;
+}
+.leave-plan .table-scroll { border: 1px solid #e1e7ef; border-radius: 8px; }
