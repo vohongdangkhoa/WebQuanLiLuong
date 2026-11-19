@@ -69,7 +69,7 @@ public sealed class OracleLeavePlanningRepository(OracleConnectionFactory factor
         command.Parameters.Add("p_rows", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
         using var reader = await command.ExecuteReaderAsync(ct);
         var days = new List<LeavePlanDay>();
-        while (await reader.ReadAsync(ct))
+        while (await reader.ReadRowAsync(ct))
         {
             days.Add(new LeavePlanDay(DateOnly.FromDateTime(reader.GetDateTime(0)),
                 reader.IsDBNull(1) ? null : reader.GetInt64(1), reader.IsDBNull(2) ? null : reader.GetInt64(2),

@@ -29,7 +29,7 @@ public class OracleEmployeeRepository
     var employees = new List<EmployeeListItem>();
     var departmentIndex = reader.GetOrdinal("DEPARTMENT_NAME");
     var positionIndex = reader.GetOrdinal("POSITION_NAME");
-    while (await reader.ReadAsync(cancellationToken))
+    while (await reader.ReadRowAsync(cancellationToken))
     {
         employees.Add(new EmployeeListItem
         {
@@ -92,7 +92,7 @@ IsDBNull kiểm tra phòng ban có bị trống trong kết quả Oracle không.
         var validFromIndex = reader.GetOrdinal("VALID_FROM");
         var validToIndex = reader.GetOrdinal("VALID_TO");
 
-        while (await reader.ReadAsync(cancellationToken))
+        while (await reader.ReadRowAsync(cancellationToken))
         {
             assignments.Add(new EmployeeAssignmentListItem
             {

@@ -22,7 +22,7 @@ public sealed class OraclePlatformRepository(OracleConnectionFactory factory)
         command.Parameters.Add("p_rows", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
         using var reader = await command.ExecuteReaderAsync(token);
         var rows = new List<Dictionary<string, object?>>();
-        while (await reader.ReadAsync(token))
+        while (await reader.ReadRowAsync(token))
         {
             var row = new Dictionary<string, object?>();
             for (var i = 0; i < reader.FieldCount; i++)

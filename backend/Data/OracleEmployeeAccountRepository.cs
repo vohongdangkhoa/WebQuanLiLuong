@@ -72,7 +72,7 @@ public sealed class OracleEmployeeAccountRepository(
         command.Parameters.Add("p_lock", OracleDbType.Int32).Value = forUpdate ? 1 : 0;
         command.Parameters.Add("p_rows", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
         using var reader = await command.ExecuteReaderAsync(ct);
-        if (!await reader.ReadAsync(ct))
+        if (!await reader.ReadRowAsync(ct))
             throw new PlatformException("Không tìm thấy nhân viên.", 404);
         return new EmployeeAccountContext(
             reader.GetInt64(0), reader.GetString(1), reader.GetString(2),

@@ -36,7 +36,7 @@ public class OracleDepartmentRepository
 
         var departments = new List<DepartmentListItem>();
 
-        while (await reader.ReadAsync(cancellationToken))
+        while (await reader.ReadRowAsync(cancellationToken))
         {
             departments.Add(new DepartmentListItem
             {

@@ -39,7 +39,7 @@ public sealed class OracleHrRepository(OracleConnectionFactory connectionFactory
         command.Parameters.Add("p_rows", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
         using var reader = await command.ExecuteReaderAsync(ct);
         var rows = new List<Dictionary<string, object?>>();
-        while (await reader.ReadAsync(ct))
+        while (await reader.ReadRowAsync(ct))
         {
             var row = new Dictionary<string, object?>();
             for (var index = 0; index < reader.FieldCount; index++)
@@ -78,7 +78,7 @@ public sealed class OracleHrRepository(OracleConnectionFactory connectionFactory
         command.Parameters.Add("p_rows", OracleDbType.RefCursor).Direction = ParameterDirection.Output;
         using var reader = await command.ExecuteReaderAsync(ct);
         var rows = new List<Dictionary<string, object?>>();
-        while (await reader.ReadAsync(ct))
+        while (await reader.ReadRowAsync(ct))
         {
             var row = new Dictionary<string, object?>();
             for (var index = 0; index < reader.FieldCount; index++)

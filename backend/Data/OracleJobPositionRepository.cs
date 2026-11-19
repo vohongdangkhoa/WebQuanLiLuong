@@ -36,7 +36,7 @@ public class OracleJobPositionRepository
 
         var jobPositions = new List<JobPositionListItem>();
 
-        while (await reader.ReadAsync(cancellationToken))
+        while (await reader.ReadRowAsync(cancellationToken))
         {
             jobPositions.Add(new JobPositionListItem
             {

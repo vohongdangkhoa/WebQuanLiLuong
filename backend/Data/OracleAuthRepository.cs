@@ -35,7 +35,7 @@ public class OracleAuthRepository
     AuthUser? user = null;
     var roleIndex = reader.GetOrdinal("ROLE_CODE");
 
-    while (await reader.ReadAsync(cancellationToken))
+    while (await reader.ReadRowAsync(cancellationToken))
     {
         if (user is null)
         {
@@ -80,7 +80,7 @@ public async Task<AuthUser?> FindForSessionAsync(
     AuthUser? user = null;
     var roleIndex = reader.GetOrdinal("ROLE_CODE");
 
-    while (await reader.ReadAsync(cancellationToken))
+    while (await reader.ReadRowAsync(cancellationToken))
     {
         if (user is null)
         {
